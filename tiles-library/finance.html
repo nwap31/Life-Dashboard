@@ -87,6 +87,20 @@
   .rval.up{color:var(--brand)} .rval.down{color:var(--neg)}
   .tag{font-family:var(--mono);font-size:10px;color:var(--muted)}
   .tag.bad{color:var(--neg)}
+  /* money tab — transactions, budgets, savings goals */
+  .mCard{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;text-align:left}
+  .secLbl2{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;text-align:left}
+  .mRow{padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:rgba(14,14,17,.5);margin-bottom:8px;animation:up .4s var(--ease) both}
+  .mRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .bal2{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted-strong)}
+  .bal2.neg{color:var(--neg)}
+  .mut{color:var(--muted)}
+  .ptrack2{height:5px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:9px}
+  .pfill2{height:100%;border-radius:999px;background:linear-gradient(90deg,#3ddc97,var(--brand));transition:width .5s var(--ease)}
+  .pfill2.over{background:linear-gradient(90deg,#e0a94f,#e0894f)}
+  .gActions{display:flex;gap:8px;align-items:center;margin-top:10px}
+  .miniAdd{background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--muted);font:inherit;font-size:11.5px;padding:6px 10px;cursor:pointer;transition:color .14s,border-color .14s}
+  .miniAdd:hover{color:var(--brand);border-color:var(--brand)}
   .starterTag{width:max-content;max-width:92%;margin:0 auto 20px;padding:6px 14px;border:1px solid rgba(110,231,183,.25);border-radius:999px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#84848c;text-align:center}
   .starterTag,.starterTag *{line-height:1.6}
 </style>
@@ -101,6 +115,7 @@
 let store={};let view='networth';
 let editingId=null;let editKind='bal';let adding=false;let addingStock=false;let addingSub=false;
 let jAdding=false;let newTrade={dir:'long'};
+let mDir='out';let mAddTxn=false;let mAddBudget=false;let mAddGoal=false;let mContribId=null;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fetchingS=new Set();let finNote=false;
 function persist(){window.Vitality.save(store)}
@@ -110,6 +125,15 @@ function subs(){if(!Array.isArray(store.subs))store.subs=[];return store.subs}
 function trades(){if(!Array.isArray(store.trades))store.trades=[];return store.trades}
 function tradeStats(){const t=trades(),n=t.length;const wins=t.filter(x=>x.r>0).length;const net=t.reduce((s,x)=>s+(typeof x.r==='number'?x.r:0),0);return{n,wins,net,wr:n?Math.round(wins/n*100):0,avg:n?net/n:0};}
 function fmtR(r){const v=Math.round(r*10)/10;return (v>=0?'+':'−')+Math.abs(v)+'R';}
+function txns(){if(!Array.isArray(store.txns))store.txns=[];return store.txns}
+function budgets(){if(!Array.isArray(store.budgets))store.budgets=[];return store.budgets}
+function svgoals(){if(!Array.isArray(store.goals))store.goals=[];return store.goals}
+function inMonth(t){const d=new Date(t),n=new Date();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();}
+function monthTxns(){return txns().filter(x=>inMonth(x.t))}
+function monthIn(){return monthTxns().filter(x=>x.dir==='in').reduce((s,x)=>s+(+x.amount||0),0)}
+function monthOut(){return monthTxns().filter(x=>x.dir==='out').reduce((s,x)=>s+(+x.amount||0),0)}
+function monthSaved(){return monthIn()-monthOut()-monthlyBurn()}
+function spentByCat(){const m={};for(const x of monthTxns())if(x.dir==='out'){const c=x.cat||'Uncategorized';m[c]=(m[c]||0)+(+x.amount||0);}return m;}
 function hist(){if(!Array.isArray(store.history))store.history=[];return store.history}
 function holdValue(h){return (typeof h.shares==='number'?h.shares:0)*(typeof h.price==='number'?h.price:0)}
 function stockTotal(){return holds().reduce((s,h)=>s+holdValue(h),0)}
@@ -225,8 +249,87 @@ function addTrade(){
   jAdding=false;newTrade={dir:'long'};persist();render();
 }
 
+function moneyBody(){
+  let h='';
+  /* add a transaction */
+  if(mAddTxn){
+    h+='<div class="mCard"><div class="seg"><button class="'+(mDir==='out'?'on':'')+'" data-mdir="out">Expense</button><button class="'+(mDir==='in'?'on':'')+'" data-mdir="in">Income</button></div>'
+      +'<div class="addRow" style="grid-template-columns:1fr 96px auto"><input id="mCatIn" placeholder="category — e.g. Food" autocomplete="off"/><input id="mAmtIn" type="text" inputmode="decimal" placeholder="$" autocomplete="off"/><button data-maddgo>Add</button></div></div>';
+  }else h+='<button class="addBtn" data-maddtxn>+ Log income or expense</button>';
+
+  /* this month by category, with budgets */
+  const spent=spentByCat();const bmap={};for(const b of budgets())bmap[b.cat]=b.amount;
+  const cats=Object.keys(spent);for(const b of budgets())if(!(b.cat in spent))cats.push(b.cat);
+  cats.sort((a,b)=>(spent[b]||0)-(spent[a]||0));
+  if(cats.length){
+    h+='<div class="secLbl2">This month · by category</div>';
+    for(const c of cats){
+      const sp=spent[c]||0,bud=bmap[c],over=bud&&sp>bud,pct=bud?Math.min(100,Math.round(sp/bud*100)):0;
+      h+='<div class="mRow"><div class="mRowTop"><span class="nm">'+esc(c)+'</span><span class="bal2'+(over?' neg':'')+'">'+fmtMoney(sp)+(bud?' <span class="mut">/ '+fmtMoney(bud)+'</span>':'')+'</span></div>'
+        +(bud?'<div class="ptrack2"><div class="pfill2'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>':'')+'</div>';
+    }
+  }
+  if(mAddBudget){
+    h+='<div class="mCard"><div class="addRow" style="grid-template-columns:1fr 96px auto"><input id="bCatIn" placeholder="category" autocomplete="off"/><input id="bAmtIn" type="text" inputmode="decimal" placeholder="$ / mo" autocomplete="off"/><button data-baddgo>Set</button></div></div>';
+  }else h+='<button class="addBtn" data-maddbudget>+ Set a category budget</button>';
+
+  /* savings goals */
+  h+='<div class="secLbl2">Savings goals</div>';
+  for(const g of svgoals()){
+    const pct=g.target?Math.min(100,Math.round((g.saved||0)/g.target*100)):0;
+    h+='<div class="mRow"><div class="mRowTop"><span class="nm">'+esc(g.name)+'</span><span class="bal2">'+fmtMoney(g.saved||0)+' <span class="mut">/ '+fmtMoney(g.target||0)+'</span></span></div>'
+      +'<div class="ptrack2"><div class="pfill2" style="width:'+pct+'%"></div></div><div class="gActions">';
+    if(mContribId===g.id)h+='<div class="addRow" style="grid-template-columns:1fr auto;flex:1"><input id="cAmtIn" type="text" inputmode="decimal" placeholder="add $" autocomplete="off"/><button data-cgo="'+g.id+'">Add</button></div>';
+    else h+='<button class="miniAdd" data-contrib="'+g.id+'">+ contribute</button><button class="del" data-gdel="'+g.id+'" title="Remove">&times;</button>';
+    h+='</div></div>';
+  }
+  if(mAddGoal){
+    h+='<div class="mCard"><div class="addRow" style="grid-template-columns:1fr 96px auto"><input id="gNmIn" placeholder="goal — e.g. Emergency fund" autocomplete="off"/><input id="gTgtIn" type="text" inputmode="decimal" placeholder="target $" autocomplete="off"/><button data-gaddgo>Add</button></div></div>';
+  }else h+='<button class="addBtn" data-maddgoal>+ Add savings goal</button>';
+
+  /* recent transactions */
+  const rec=txns().slice().reverse().slice(0,6);
+  if(rec.length){
+    h+='<div class="secLbl2">Recent</div>';
+    for(const x of rec){
+      const out=x.dir==='out';
+      h+='<div class="row"><div class="nmwrap"><span class="nm">'+esc(x.cat||'—')+'</span><div class="hsub">'+(out?'expense':'income')+' · '+new Date(x.t).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div></div>'
+        +'<span class="rval '+(out?'down':'up')+'">'+(out?'−':'+')+fmtMoney(+x.amount||0).replace('−','')+'</span>'
+        +'<button class="del" data-txdel="'+x.id+'" title="Remove">&times;</button></div>';
+    }
+  }
+  return h;
+}
+function addTxn(){
+  const c=document.getElementById('mCatIn'),a=document.getElementById('mAmtIn');
+  const amt=Number(String(a?a.value:'').replace(/[$,\s]/g,''));
+  if(!isFinite(amt)||amt<=0){if(a)a.focus();return;}
+  txns().push({id:'x'+Math.random().toString(36).slice(2,8),t:Date.now(),dir:mDir,amount:amt,cat:(c?c.value:'').trim()||'Uncategorized'});
+  mAddTxn=false;persist();render();
+}
+function addBudget(){
+  const c=document.getElementById('bCatIn'),a=document.getElementById('bAmtIn');
+  const cat=(c?c.value:'').trim(),amt=Number(String(a?a.value:'').replace(/[$,\s]/g,''));
+  if(!cat){if(c)c.focus();return;}if(!isFinite(amt)||amt<=0){if(a)a.focus();return;}
+  const ex=budgets().find(b=>b.cat.toLowerCase()===cat.toLowerCase());
+  if(ex)ex.amount=amt;else budgets().push({id:'b'+Math.random().toString(36).slice(2,8),cat,amount:amt});
+  mAddBudget=false;persist();render();
+}
+function addGoal(){
+  const n=document.getElementById('gNmIn'),t=document.getElementById('gTgtIn');
+  const name=(n?n.value:'').trim(),tgt=Number(String(t?t.value:'').replace(/[$,\s]/g,''));
+  if(!name){if(n)n.focus();return;}if(!isFinite(tgt)||tgt<=0){if(t)t.focus();return;}
+  svgoals().push({id:'g'+Math.random().toString(36).slice(2,8),name,target:tgt,saved:0});
+  mAddGoal=false;persist();render();
+}
+function contribute(id){
+  const a=document.getElementById('cAmtIn');const amt=Number(String(a?a.value:'').replace(/[$,\s]/g,''));
+  const g=svgoals().find(x=>x.id===id);if(g&&isFinite(amt)&&amt!==0)g.saved=Math.max(0,(g.saved||0)+amt);
+  mContribId=null;persist();render();
+}
+
 function tabBar(){
-  return '<div class="tabBar">'+[['networth','Net worth'],['stocks','Stocks'],['subs','Subs'],['journal','Journal']]
+  return '<div class="tabBar">'+[['networth','Worth'],['stocks','Stocks'],['subs','Subs'],['journal','Journal'],['money','Money']]
     .map(t=>'<button class="tab'+(view===t[0]?' on':'')+'" data-view="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>';
 }
 
@@ -242,6 +345,12 @@ function render(){
     html='<div class="kick">✦ holdings</div><div class="worth">'+(holds().length?fmtMoney(stockTotal()):'—')+'</div>'
       +(holds().length?'<div class="delta">'+holds().length+' position'+(holds().length===1?'':'s')+' · live-priced</div>':'')
       +'<div class="list" style="margin-top:24px">'+listStocks()+'</div>';
+  }else if(view==='money'){
+    const saved=monthSaved(),neg=saved<0;
+    html='<div class="kick">✦ saved this month</div>'
+      +'<div class="worth'+(neg?' neg':'')+'">'+fmtMoney(saved)+'</div>'
+      +'<div class="delta">in '+fmtMoney(monthIn())+' · out '+fmtMoney(monthOut()+monthlyBurn())+' <span class="mut">(incl. subs)</span></div>'
+      +'<div class="list" style="margin-top:20px">'+moneyBody()+'</div>';
   }else if(view==='journal'){
     const st=tradeStats();
     html='<div class="kick">✦ trade journal</div>'
@@ -263,6 +372,10 @@ function render(){
   if(addingStock){const s=document.getElementById('symIn');if(s)s.focus();const sh=document.getElementById('shIn');if(sh)sh.addEventListener('keydown',e=>{if(e.key==='Enter')addStock()});}
   if(addingSub){const n=document.getElementById('subNmIn');if(n)n.focus();const amt=document.getElementById('subAmtIn');if(amt)amt.addEventListener('keydown',e=>{if(e.key==='Enter')addSub()});}
   if(jAdding){const r=document.getElementById('jrIn');if(r){r.focus();r.addEventListener('keydown',e=>{if(e.key==='Enter')addTrade()});}const m=document.getElementById('jmIn');if(m)m.addEventListener('keydown',e=>{if(e.key==='Enter')addTrade()});}
+  if(mAddTxn){const c=document.getElementById('mCatIn');if(c)c.focus();const a=document.getElementById('mAmtIn');if(a)a.addEventListener('keydown',e=>{if(e.key==='Enter')addTxn()});}
+  if(mAddBudget){const c=document.getElementById('bCatIn');if(c)c.focus();const a=document.getElementById('bAmtIn');if(a)a.addEventListener('keydown',e=>{if(e.key==='Enter')addBudget()});}
+  if(mAddGoal){const n=document.getElementById('gNmIn');if(n)n.focus();const t=document.getElementById('gTgtIn');if(t)t.addEventListener('keydown',e=>{if(e.key==='Enter')addGoal()});}
+  if(mContribId){const a=document.getElementById('cAmtIn');if(a){a.focus();a.addEventListener('keydown',e=>{if(e.key==='Enter')contribute(mContribId)});}}
 }
 
 function commit(){
@@ -302,13 +415,30 @@ function addSub(){
 
 document.addEventListener('click',e=>{
   const tab=e.target.closest('[data-view]');
-  if(tab){view=tab.getAttribute('data-view');editingId=null;adding=addingStock=addingSub=jAdding=false;render();return}
+  if(tab){view=tab.getAttribute('data-view');editingId=null;adding=addingStock=addingSub=jAdding=mAddTxn=mAddBudget=mAddGoal=false;mContribId=null;render();return}
   if(e.target.closest('[data-jtoggle]')){jAdding=true;editingId=null;render();return}
   const jd=e.target.closest('[data-jdir]');
   if(jd){newTrade.dir=jd.getAttribute('data-jdir');render();return}
   if(e.target.closest('[data-jadd]')){addTrade();return}
   const jdel=e.target.closest('[data-jdel]');
   if(jdel){const id=jdel.getAttribute('data-jdel');store.trades=trades().filter(x=>x.id!==id);persist();render();return}
+  /* money tab */
+  if(e.target.closest('[data-maddtxn]')){mAddTxn=true;editingId=null;render();return}
+  const md=e.target.closest('[data-mdir]');
+  if(md){mDir=md.getAttribute('data-mdir');render();return}
+  if(e.target.closest('[data-maddgo]')){addTxn();return}
+  if(e.target.closest('[data-maddbudget]')){mAddBudget=true;render();return}
+  if(e.target.closest('[data-baddgo]')){addBudget();return}
+  if(e.target.closest('[data-maddgoal]')){mAddGoal=true;render();return}
+  if(e.target.closest('[data-gaddgo]')){addGoal();return}
+  const ct=e.target.closest('[data-contrib]');
+  if(ct){mContribId=ct.getAttribute('data-contrib');render();return}
+  const cg=e.target.closest('[data-cgo]');
+  if(cg){contribute(cg.getAttribute('data-cgo'));return}
+  const gdel=e.target.closest('[data-gdel]');
+  if(gdel){const id=gdel.getAttribute('data-gdel');store.goals=svgoals().filter(x=>x.id!==id);persist();render();return}
+  const txdel=e.target.closest('[data-txdel]');
+  if(txdel){const id=txdel.getAttribute('data-txdel');store.txns=txns().filter(x=>x.id!==id);persist();render();return}
   const b=e.target.closest('[data-bal]');
   if(b){editingId=b.getAttribute('data-bal');editKind='bal';adding=addingStock=addingSub=false;render();return}
   const sh=e.target.closest('[data-sh]');
@@ -336,6 +466,9 @@ if(!window.Vitality){window.Vitality={save:function(d){try{localStorage.setItem(
   if(!Array.isArray(store.holdings))store.holdings=[];
   if(!Array.isArray(store.subs))store.subs=[];
   if(!Array.isArray(store.trades))store.trades=[];
+  if(!Array.isArray(store.txns))store.txns=[];
+  if(!Array.isArray(store.budgets))store.budgets=[];
+  if(!Array.isArray(store.goals))store.goals=[];
   if(!Array.isArray(store.history))store.history=[];
   render();
   for(const hd of holds()){ if(!hd.symbol)continue; await refreshStock(hd); await new Promise(r=>setTimeout(r,1200)); }
