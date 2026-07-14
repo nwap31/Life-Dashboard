@@ -1,25 +1,25 @@
 /* ----- Tokens ----- */
 
 :root {
-  /* Colors */
-  --bg: #000000;
-  --bg-elevated: #0a0a0a;
-  --fg: #ffffff;
-  --mint: #CBA35C;
-  --mint-hover: #D8B36A;
-  --mint-deep: #4A3A1C;       /* dark teal partner to mint */
-  --mint-glow: rgba(203, 163, 92, 0.4);
-  --mint-ink: #241A06;        /* dark foreground for text/icons on a mint fill */
-  --amber: #F59E0B;
-  --amber-warm: #d97706;      /* deeper amber for duotone gradients */
-  --wine: #7c2d12;            /* deep red-brown, partners with amber */
-  --red: #EF4444;
-  --muted: rgba(255, 255, 255, 0.5);
-  --muted-strong: rgba(255, 255, 255, 0.7);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --card: rgba(255, 255, 255, 0.02);
-  --card-elevated: rgba(255, 255, 255, 0.04);
+  /* Colors — LIGHT THEME (warm paper). Gold accent kept from the earthy retheme. */
+  --bg: #FBF9F5;             /* warm off-white canvas */
+  --bg-elevated: #FFFFFF;
+  --fg: #221E17;             /* warm dark-brown ink */
+  --mint: #A9713C;           /* accent: deeper ochre so it's readable on paper */
+  --mint-hover: #8F5D2F;
+  --mint-deep: #EFE3C8;      /* soft gold tint partner (light theme) */
+  --mint-glow: rgba(169, 113, 60, 0.22);
+  --mint-ink: #FFFFFF;       /* text/icons on the ochre accent fill */
+  --amber: #C77B0E;          /* deepened for contrast on light */
+  --amber-warm: #a85e06;
+  --wine: #7c2d12;
+  --red: #C0392B;
+  --muted: rgba(34, 30, 23, 0.55);
+  --muted-strong: rgba(34, 30, 23, 0.74);
+  --border: rgba(34, 30, 23, 0.12);
+  --border-strong: rgba(34, 30, 23, 0.22);
+  --card: rgba(34, 30, 23, 0.025);
+  --card-elevated: #FFFFFF;
 
   /* Spacing */
   --space-1: 0.25rem;
@@ -73,7 +73,7 @@ html, body {
      near-black, never a pure-black band. Tint the root the editorial
      atmosphere's darkest stop (#04060a) so the reveal is seamless, and damp the
      bounce so it barely shows at all. body keeps var(--bg) below. */
-  background: #04060a;
+  background: #FBF9F5;
   overscroll-behavior-y: none;
 }
 

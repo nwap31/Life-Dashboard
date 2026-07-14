@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Vitality',
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
   },
   // Modern equivalent of the (deprecated) apple-mobile-web-app-capable meta that
   // `appleWebApp.capable` emits — keeps both so non-iOS browsers stop warning.
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 // userScalable:false stops double-tap-zoom fighting tap targets in the dense
 // logger UI.
 export const viewport: Viewport = {
-  themeColor: '#04060a',
+  themeColor: '#FBF9F5',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

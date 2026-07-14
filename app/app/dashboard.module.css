@@ -345,7 +345,7 @@
     bottom: 16px;
     font-size: 11px;
     line-height: 1.35;
-    color: rgba(255, 255, 255, 0.42);
+    color: rgba(34, 30, 23, 0.42);
   }
   .tileArrow {
     bottom: 34px;
@@ -489,7 +489,7 @@
   font-size: 13px;
   line-height: 1.4;
   letter-spacing: 0.005em;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(34, 30, 23, 0.45);
 }
 
 /* Art variants used inline (mirrors PosterGrid art treatments) */
@@ -525,8 +525,8 @@
 .artGrid {
   background: #07090a;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(34, 30, 23, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 30, 23, 0.04) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 
