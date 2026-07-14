@@ -28,6 +28,8 @@ const SHIM = `<script>
     else if (m.type === 'youtube:error') p.reject(new Error(m.reason || 'youtube_failed'));
     else if (m.type === 'stock:result') p.resolve(m.price);
     else if (m.type === 'stock:error') p.reject(new Error(m.reason || 'stock_failed'));
+    else if (m.type === 'garmin:result') p.resolve(m.data);
+    else if (m.type === 'garmin:error') p.reject(new Error(m.reason || 'garmin_failed'));
   });
   function call(type, extra) {
     return new Promise(function (resolve, reject) {
@@ -52,6 +54,7 @@ const SHIM = `<script>
     tiktok: function (handle) { return call('tiktok', { handle: handle }); },
     youtube: function (handle) { return call('youtube', { handle: handle }); },
     stock: function (symbol) { return call('stock', { symbol: symbol }); },
+    garmin: function () { return call('garmin', {}); },
     read: function (slot) { return call('read', { slot: slot }); },
     report: function (stream) {
       parent.postMessage({ source: 'vitality-tile', type: 'report', stream: stream }, '*');

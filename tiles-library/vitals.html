@@ -7,11 +7,12 @@
 <title>Vitals</title>
 <!--
   VITALS — bone-simple. One recovery number, from two inputs you bring: how you
-  slept and how you feel. A WHOOP button is here for later (Episode 2 wires the
-  real connection). The 7-day line scales your inputs over time.
+  slept and how you feel. A Garmin button pulls a device recovery when it's wired
+  (window.Vitality.garmin → /api/vitals/garmin; dormant until the OAuth token is
+  set, then it fills whoopRecovery/sleep/hrv). The 7-day line scales it over time.
 
   Sealed: no network. Saves through window.Vitality.
-  Store: { 'YYYY-MM-DD': { sleepHours, feel, whoopRecovery? } }
+  Store: { 'YYYY-MM-DD': { sleepHours, feel, whoopRecovery?, hrv?, restingHr? } }
   Recovery: whoopRecovery wins when a device fills it; else 0.6·feel + 0.4·sleep.
   The SAME formula lives in peak.html (recoveryFromVitals) + docs/THE-MATH.md §5
   + /sweep — change one, change all, so Peak never disagrees.
@@ -96,7 +97,41 @@
 const FEEL=[['Wrecked',25],['Rough',45],['OK',65],['Good',82],['Great',95]];
 let store={};
 let draft={sleepHours:7.5,feel:null};
+let garminMsg='';
+let garminBusy=false;
 function persist(){window.Vitality.save(store)}
+
+/* Garmin pull — asks the host (window.Vitality.garmin → /api/vitals/garmin) for
+   a normalized wellness summary and files it into today's entry. recovery →
+   whoopRecovery (a device number wins over sleep/feel, and reshapes Peak). Dormant
+   until GARMIN_ACCESS_TOKEN + GARMIN_SUMMARY_URL are set → 'no_creds'. On the
+   silent boot pull we only surface a message on success; the tapped button reports
+   everything. */
+async function pullGarmin(silent){
+  if(garminBusy||!window.Vitality||typeof window.Vitality.garmin!=='function')return;
+  garminBusy=true;
+  if(!silent){garminMsg='Checking Garmin…';render();}
+  try{
+    const g=await window.Vitality.garmin();
+    if(g&&typeof g==='object'){
+      const k=todayKey(),next=Object.assign({},store[k]||{});
+      if(typeof g.recovery==='number')next.whoopRecovery=g.recovery;
+      if(typeof g.sleepHours==='number'){next.sleepHours=g.sleepHours;draft.sleepHours=g.sleepHours;}
+      if(typeof g.hrv==='number')next.hrv=g.hrv;
+      if(typeof g.restingHr==='number')next.restingHr=g.restingHr;
+      store[k]=next;persist();
+      garminMsg='Garmin synced'+(g.recovery!=null?' — recovery '+g.recovery+'%':'');
+    }else if(!silent){garminMsg='Garmin returned no data yet.';}
+  }catch(err){
+    if(!silent){
+      const r=String(err&&err.message||'');
+      garminMsg = r==='no_creds'
+        ? 'Garmin not connected yet — add your GARMIN_ACCESS_TOKEN + GARMIN_SUMMARY_URL, then tap again.'
+        : 'Garmin sync failed ('+r+'). Manual entry still works.';
+    }
+  }
+  garminBusy=false;render();
+}
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 /* THE shared recovery formula — identical to peak.html recoveryFromVitals,
@@ -135,7 +170,8 @@ function render(){
   const line=trend();
   document.getElementById('app').innerHTML=
     '<div class="hero"><div class="rec '+tn+'">'+(rec!=null?rec+'%':'—')+'</div></div>'
-    +'<div class="whoop"><button class="whoopBtn" data-whoop><span class="dot"></span>Connect WHOOP</button></div>'
+    +'<div class="whoop"><button class="whoopBtn" data-garmin><span class="dot"></span>'+(garminBusy?'Syncing…':'Connect Garmin')+'</button></div>'
+    +(garminMsg?'<div class="whoopNote">'+garminMsg+'</div>':'')
     +'<div class="card">'
       +'<div class="sleepRow"><button class="step" data-sleep="-0.5">−</button><span class="sleepVal">'+fmtSleep(draft.sleepHours)+'</span><button class="step" data-sleep="0.5">+</button></div>'
       +'<div class="feelRow" style="margin-top:20px">'+FEEL.map((f)=>'<button class="feel'+(draft.feel===f[1]?' on':'')+'" data-feel="'+f[1]+'">'+f[0]+'</button>').join('')+'</div>'
@@ -149,6 +185,7 @@ document.addEventListener('click',e=>{
   if(s){draft.sleepHours=Math.max(0,Math.min(14,draft.sleepHours+parseFloat(s.getAttribute('data-sleep'))));render();return}
   const f=e.target.closest('[data-feel]');
   if(f){draft.feel=Number(f.getAttribute('data-feel'));render();return}
+  if(e.target.closest('[data-garmin]')){pullGarmin(false);return}
   if(e.target.closest('[data-save]')){
     if(draft.feel==null)return;
     const k=todayKey(),prev=store[k]||{};
@@ -157,13 +194,14 @@ document.addEventListener('click',e=>{
   }
 });
 
-if(!window.Vitality){window.Vitality={save:function(d){try{localStorage.setItem('v:prev:vitals',JSON.stringify(d));}catch(e){}return Promise.resolve(true);},load:function(){try{return Promise.resolve(JSON.parse(localStorage.getItem('v:prev:vitals')||'{}'));}catch(e){return Promise.resolve({});}},read:function(){return Promise.resolve(null);}};}
+if(!window.Vitality){window.Vitality={save:function(d){try{localStorage.setItem('v:prev:vitals',JSON.stringify(d));}catch(e){}return Promise.resolve(true);},load:function(){try{return Promise.resolve(JSON.parse(localStorage.getItem('v:prev:vitals')||'{}'));}catch(e){return Promise.resolve({});}},read:function(){return Promise.resolve(null);},garmin:function(){return Promise.reject(new Error('no_creds'));}};}
 (async()=>{
   const d=await window.Vitality.load();
   store=(d&&typeof d==='object'&&!Array.isArray(d))?d:{};
   const t=todays();
   if(t){ if(typeof t.sleepHours==='number')draft.sleepHours=t.sleepHours; if(typeof t.feel==='number')draft.feel=t.feel; }
   render();
+  pullGarmin(true); /* silent auto-sync on load; no-op until Garmin creds are set */
 })();
 </script>
 </body>

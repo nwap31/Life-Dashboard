@@ -136,6 +136,26 @@ export function useTileHost(
         return
       }
 
+      // Garmin wellness — routed through /api/vitals/garmin so the Garmin OAuth
+      // token stays server-side. Returns a normalized { recovery?, sleepHours?,
+      // hrv?, restingHr? } for the Vitals tile to file into today's entry.
+      // Dormant until GARMIN_ACCESS_TOKEN + GARMIN_SUMMARY_URL are set → no_creds,
+      // which the tile reads as "connect Garmin".
+      if (msg.type === 'garmin') {
+        try {
+          const r = await fetch('/api/vitals/garmin')
+          const j = await r.json()
+          if (j && typeof j === 'object' && !j.error) {
+            src.postMessage({ source: 'vitality-host', type: 'garmin:result', id: msg.id, data: j }, '*')
+          } else {
+            src.postMessage({ source: 'vitality-host', type: 'garmin:error', id: msg.id, reason: String(j?.error || 'no_data') }, '*')
+          }
+        } catch {
+          src.postMessage({ source: 'vitality-host', type: 'garmin:error', id: msg.id, reason: 'fetch_failed' }, '*')
+        }
+        return
+      }
+
       // Cross-tile READ — the host hands a tile another slot's saved data so
       // tiles can react to each other client-side (e.g. Peak reshaping from the
       // Vitals recovery) with no /sweep and no connector. Read-only, the user's
