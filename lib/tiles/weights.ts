@@ -53,25 +53,25 @@ export const DEFAULT_GOALS: Goal[] = [
     title: 'Be a profitable MNQ trader — rules first',
     accent: '#C17A54', // terracotta
     // The main goal. MNQ futures on an FVG + OTE model; the edge is discipline,
-    // so the north star is DAYS FOLLOWING THE RULES. Finance is the direct lever;
-    // day trading is won on the mental game — Vitals (sleep/stress/focus) and
-    // Peak (caffeine/sharpness) carry real weight, Fuel/Train keep the machine steady.
-    weights: { finance: 55, vitals: 22, peak: 10, fuel: 8, train: 5 },
+    // so the north star is DAYS FOLLOWING THE RULES — now measured by the Rules
+    // tile (the 'peak' slot, repurposed). Rules leads; Finance is the account
+    // scoreboard; Vitals is the mental game; Fuel/Train keep the machine steady.
+    weights: { peak: 45, finance: 25, vitals: 20, fuel: 6, train: 4 },
   },
   {
     id: 'jacked',
     title: 'Get jacked',
     accent: '#8A9A5B', // sage / olive
-    weights: { train: 40, fuel: 30, vitals: 18, peak: 12 },
+    weights: { train: 45, fuel: 33, vitals: 22 },
   },
   {
     id: 'knowledge',
     title: 'Become a credit analyst — markets, fixed income, and myself',
     accent: '#A9713C', // ochre / sienna
-    // Now measured by the Learn tile (the 'brand' slot, repurposed): three tracks
-    // — self-improvement, markets, fixed income. Learn is the direct driver;
-    // Vitals/Fuel/Peak protect the retention and focus behind it.
-    weights: { brand: 55, vitals: 20, fuel: 15, peak: 10 },
+    // Measured by the Learn tile (the 'brand' slot, repurposed): three tracks —
+    // self-improvement, markets, fixed income. Learn is the direct driver;
+    // Vitals/Fuel protect the retention and focus behind it.
+    weights: { brand: 60, vitals: 22, fuel: 18 },
   },
 ]
 
@@ -81,7 +81,7 @@ export const OVERALL_GOAL: Goal = {
   id: 'overall',
   title: 'Trade by the rules, build toward credit analyst, get jacked',
   accent: '#CBA35C', // warm earthy gold
-  weights: { finance: 32, vitals: 18, train: 16, brand: 12, fuel: 12, peak: 10 },
+  weights: { peak: 20, finance: 22, vitals: 16, brand: 16, train: 14, fuel: 12 },
 }
 
 /** Overall first, then the individual goals. */
@@ -97,18 +97,18 @@ export function activeGoal(): Goal | undefined {
 
 export const DEFAULT_NOTICED: Notice[] = [
   {
-    id: 'n-learn-built',
+    id: 'n-rules-built',
     when: 'just now',
-    text: 'Closed the gap, Nolan. Your knowledge goal had no home — so I turned the Brand tile you never used into a Learn tile: three tracks, self-improvement, markets, fixed income, aimed straight at credit analyst. The board reads earthy now, the way you wanted. Next lever is your trading north star — days you followed your rules.',
+    text: 'Your north star has a home now, Nolan. The Peak tile you never used is a Rules tile: one tap a day — clean or broke — with a streak you will not want to kill and a 30-day adherence %. And I made it the main event: your trader goal now leans on Rules more than on P&L, because discipline is the thing that actually produces the P&L.',
     points: [
-      'Built **Learn** in the old Brand slot — three tracks toward **credit analyst**',
-      'Knowledge goal now leans on **Learn (55%)** instead of guessing from recovery',
-      'Board retuned to **earthy tones**; your main goal is now **rules-first MNQ trading**',
-      'The one still missing: a **rules-adherence tile** — the discipline behind the P&L',
+      'Built **Rules** in the old Peak slot — clean streak + 30-day adherence',
+      'Trader goal now leans on **Rules (45%)** over Finance (25%) — discipline first',
+      'Learn (knowledge) + earthy palette already in; Garmin scaffolded on Vitals',
+      'Next in the queue: **Train → your split**, **Fuel calories**, **Trade journal**',
     ],
     deltas: [
-      { tile: 'brand', from: 0, to: 55 },
-      { tile: 'vitals', from: 45, to: 20 },
+      { tile: 'peak', from: 10, to: 45 },
+      { tile: 'finance', from: 55, to: 25 },
     ],
   },
 ]
@@ -131,18 +131,18 @@ export interface TileIdea {
 export const DEFAULT_IDEAS: Record<string, TileIdea[]> = {
   overall: [
     {
-      word: 'Rules',
-      title: 'Rules adherence',
-      tracks: 'did you trade your plan today? clean / broke a rule',
-      why: 'Your own north star: days following your rules. Finance tracks the P&L; this tracks the discipline that produces it — the single biggest lever on your main goal.',
-      estWeight: 14,
-    },
-    {
       word: 'Journal',
       title: 'Trade journal',
       tracks: 'each MNQ trade — FVG/OTE setup, result, mistake tag',
-      why: 'Rules adherence is the yes/no; this is the why. Log every trade and the review loop becomes your edge.',
-      estWeight: 10,
+      why: 'Rules is the daily yes/no; this is the why. Log every trade and the review loop behind your losses becomes your edge.',
+      estWeight: 12,
+    },
+    {
+      word: 'Sleep',
+      title: 'Sleep consistency',
+      tracks: 'bedtime + wake, night by night',
+      why: 'Discipline and focus both erode on bad sleep. Vitals sees recovery; this would see the habit that drives it.',
+      estWeight: 6,
     },
   ],
   trader: [
@@ -154,10 +154,10 @@ export const DEFAULT_IDEAS: Record<string, TileIdea[]> = {
       estWeight: 15,
     },
     {
-      word: 'Discipline',
-      title: 'Rules adherence',
-      tracks: 'did you follow your risk rules today? yes / no',
-      why: 'Blown accounts are almost never bad analysis — they are broken rules. One yes/no tile a day surfaces the leak.',
+      word: 'Prep',
+      title: 'Pre-market prep',
+      tracks: 'did you mark your levels + bias before the open? yes / no',
+      why: 'Clean days start before the bell. Rules scores the session; this scores the preparation that makes following them possible.',
       estWeight: 8,
     },
   ],

@@ -124,16 +124,20 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
       </svg>
     ),
   },
+  // Repurposed for Nolan: the 'peak' slot renders as "Rules" (trading discipline
+  // tile — his main goal's measure). Internal id stays 'peak' so routes/CSS/weights
+  // keep working; only the label + glyph + tile HTML changed. See public/tiles/peak.html.
   peak: {
     id: 'peak',
     href: '/app/starter',
     index: '03',
-    label: 'Peak',
+    label: 'Rules',
     orb: { mode: 'still', roam: 'ring', pt: '105,125' },
     defaultSize: 'tall',
     glyph: (
-      <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M2 -10 L-5 1 L0 1 L-2 10 L5 -1 L0 -1 L2 -10 Z" />
+      <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round">
+        <path d="M0 -10 L8 -6 V1 C8 6 4 9 0 10 C-4 9 -8 6 -8 1 V-6 Z" />
+        <path d="M-3.5 0 L-1 2.5 L4 -3" />
       </svg>
     ),
     art: (
