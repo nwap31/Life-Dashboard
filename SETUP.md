@@ -4,8 +4,8 @@
        → your dashboard, running on this computer
 - [x] 2. GitHub — pushed to github.com/nwap31/Life-Dashboard          DONE
        → your code is saved and safe; the door to going live
-- [ ] 3. Vercel — import the repo, click Deploy                    RECOMMENDED
-       → your dashboard LIVE at your own URL; every push auto-updates it
+- [x] 3. Vercel — LIVE at life-dashboard-jet-eta.vercel.app         DONE
+       → every push to GitHub now auto-updates the live site
 - [ ] 4. Supabase — new project, run supabase/sync.sql +
        tiles.sql, add the two NEXT_PUBLIC keys                     OPTIONAL
        → memory: data follows you across devices instead of one browser
