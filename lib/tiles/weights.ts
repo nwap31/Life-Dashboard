@@ -50,27 +50,28 @@ export interface Notice {
 export const DEFAULT_GOALS: Goal[] = [
   {
     id: 'trader',
-    title: 'Be a profitable day trader',
-    accent: '#8AB4FF',
-    // The main goal. Finance is the direct lever; but day trading is won on the
-    // mental game — Vitals (sleep/stress/focus) and Peak (caffeine/sharpness)
-    // carry real weight, with Fuel/Train keeping the machine steady.
+    title: 'Be a profitable MNQ trader — rules first',
+    accent: '#C17A54', // terracotta
+    // The main goal. MNQ futures on an FVG + OTE model; the edge is discipline,
+    // so the north star is DAYS FOLLOWING THE RULES. Finance is the direct lever;
+    // day trading is won on the mental game — Vitals (sleep/stress/focus) and
+    // Peak (caffeine/sharpness) carry real weight, Fuel/Train keep the machine steady.
     weights: { finance: 55, vitals: 22, peak: 10, fuel: 8, train: 5 },
   },
   {
     id: 'jacked',
     title: 'Get jacked',
-    accent: '#6EE7B7',
+    accent: '#8A9A5B', // sage / olive
     weights: { train: 40, fuel: 30, vitals: 18, peak: 12 },
   },
   {
     id: 'knowledge',
-    title: 'Become more knowledgeable',
-    accent: '#C4B5FD',
-    // No tile tracks learning yet — see DEFAULT_IDEAS ('knowledge' → Learn tile).
-    // Until one exists, this leans on the inputs that protect retention and
-    // consistency: recovery, energy, and steady training/fuel.
-    weights: { vitals: 45, peak: 20, fuel: 20, train: 15 },
+    title: 'Become a credit analyst — markets, fixed income, and myself',
+    accent: '#A9713C', // ochre / sienna
+    // Now measured by the Learn tile (the 'brand' slot, repurposed): three tracks
+    // — self-improvement, markets, fixed income. Learn is the direct driver;
+    // Vitals/Fuel/Peak protect the retention and focus behind it.
+    weights: { brand: 55, vitals: 20, fuel: 15, peak: 10 },
   },
 ]
 
@@ -78,9 +79,9 @@ export const DEFAULT_GOALS: Goal[] = [
  *  mentor (Claude Code). Switching it on = top priority — the board goes gold. */
 export const OVERALL_GOAL: Goal = {
   id: 'overall',
-  title: 'Trade profitably every day — sharp, strong, always learning',
-  accent: '#E8C878',
-  weights: { finance: 35, vitals: 22, train: 18, fuel: 13, peak: 12 },
+  title: 'Trade by the rules, build toward credit analyst, get jacked',
+  accent: '#CBA35C', // warm earthy gold
+  weights: { finance: 32, vitals: 18, train: 16, brand: 12, fuel: 12, peak: 10 },
 }
 
 /** Overall first, then the individual goals. */
@@ -96,13 +97,18 @@ export function activeGoal(): Goal | undefined {
 
 export const DEFAULT_NOTICED: Notice[] = [
   {
-    id: 'n-first-day',
+    id: 'n-learn-built',
     when: 'just now',
-    text: 'Set your equation, Nolan: trading leads, get jacked and grow knowledge feed in behind it. No data to read yet — the moment your tiles start filling, I watch for the patterns (trades vs sleep, gym vs focus) and retune these weights from evidence, not guesses.',
+    text: 'Closed the gap, Nolan. Your knowledge goal had no home — so I turned the Brand tile you never used into a Learn tile: three tracks, self-improvement, markets, fixed income, aimed straight at credit analyst. The board reads earthy now, the way you wanted. Next lever is your trading north star — days you followed your rules.',
     points: [
-      'Main goal locked: **be a profitable day trader** — Finance carries it',
-      'Your **mental game** (Vitals + Peak) is weighted heavier than most traders admit',
-      'One gap found: **nothing tracks learning yet** — build a Learn tile with /tile learn',
+      'Built **Learn** in the old Brand slot — three tracks toward **credit analyst**',
+      'Knowledge goal now leans on **Learn (55%)** instead of guessing from recovery',
+      'Board retuned to **earthy tones**; your main goal is now **rules-first MNQ trading**',
+      'The one still missing: a **rules-adherence tile** — the discipline behind the P&L',
+    ],
+    deltas: [
+      { tile: 'brand', from: 0, to: 55 },
+      { tile: 'vitals', from: 45, to: 20 },
     ],
   },
 ]
@@ -125,17 +131,17 @@ export interface TileIdea {
 export const DEFAULT_IDEAS: Record<string, TileIdea[]> = {
   overall: [
     {
-      word: 'Learn',
-      title: 'Learn',
-      tracks: 'study sessions + what you covered, per day',
-      why: 'One of your three goals is knowledge, but no tile measures it. This is the missing input — the cheapest one to add.',
-      estWeight: 12,
+      word: 'Rules',
+      title: 'Rules adherence',
+      tracks: 'did you trade your plan today? clean / broke a rule',
+      why: 'Your own north star: days following your rules. Finance tracks the P&L; this tracks the discipline that produces it — the single biggest lever on your main goal.',
+      estWeight: 14,
     },
     {
       word: 'Journal',
       title: 'Trade journal',
-      tracks: 'setups, wins/losses, and the mistake tags behind them',
-      why: 'Finance tracks the P&L; nothing tracks WHY. For a trader, the review loop is where the edge compounds.',
+      tracks: 'each MNQ trade — FVG/OTE setup, result, mistake tag',
+      why: 'Rules adherence is the yes/no; this is the why. Log every trade and the review loop becomes your edge.',
       estWeight: 10,
     },
   ],
@@ -173,18 +179,18 @@ export const DEFAULT_IDEAS: Record<string, TileIdea[]> = {
   ],
   knowledge: [
     {
-      word: 'Learn',
-      title: 'Learn',
-      tracks: 'study sessions, topics, minutes per day',
-      why: 'This goal has no home tile. Build it and the equation finally measures the thing you said you want — run /tile learn.',
-      estWeight: 30,
-    },
-    {
       word: 'Reading',
       title: 'Reading log',
       tracks: 'books / articles finished, pages per week',
-      why: 'A slower-burn companion to Learn: tracks depth over time, not just daily reps.',
+      why: 'A slower-burn companion to Learn: tracks depth over time, not just daily reps. Stack the credit + fixed-income books here.',
       estWeight: 12,
+    },
+    {
+      word: 'Credit',
+      title: 'Credit reps',
+      tracks: 'company teardowns / credit cases worked, per week',
+      why: 'The analyst road is built on reps. Learn tracks the hours; this tracks the actual work — real names, real spreads, real writeups.',
+      estWeight: 10,
     },
   ],
 }

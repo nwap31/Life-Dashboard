@@ -143,16 +143,21 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
       </svg>
     ),
   },
+  // Repurposed for Nolan: the 'brand' slot renders as "Learn" (knowledge tile).
+  // Internal id stays 'brand' so routes/CSS/weights keep working; only the
+  // label + glyph + tile HTML changed. See public/tiles/brand.html.
   brand: {
     id: 'brand',
     href: '/app/starter',
     index: '05',
-    label: 'Brand',
+    label: 'Learn',
     orb: { mode: 'still', roam: 'spoke', pt: '105,112' },
     defaultSize: 'tall',
     glyph: (
-      <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M-8 -5 L0 9 L8 -5" />
+      <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M0 -6 C-1.7 -7.4 -3.9 -8 -7 -7.5 L-7 7.5 C-3.9 8 -1.7 7.4 0 6" />
+        <path d="M0 -6 C1.7 -7.4 3.9 -8 7 -7.5 L7 7.5 C3.9 8 1.7 7.4 0 6" />
+        <line x1="0" y1="-6" x2="0" y2="6" />
       </svg>
     ),
     art: (
