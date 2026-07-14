@@ -5,11 +5,11 @@
   --bg: #000000;
   --bg-elevated: #0a0a0a;
   --fg: #ffffff;
-  --mint: #6EE7B7;
-  --mint-hover: #5dd6a6;
-  --mint-deep: #1f4d3d;       /* dark teal partner to mint */
-  --mint-glow: rgba(110, 231, 183, 0.4);
-  --mint-ink: #042a1c;        /* dark foreground for text/icons on a mint fill */
+  --mint: #CBA35C;
+  --mint-hover: #D8B36A;
+  --mint-deep: #4A3A1C;       /* dark teal partner to mint */
+  --mint-glow: rgba(203, 163, 92, 0.4);
+  --mint-ink: #241A06;        /* dark foreground for text/icons on a mint fill */
   --amber: #F59E0B;
   --amber-warm: #d97706;      /* deeper amber for duotone gradients */
   --wine: #7c2d12;            /* deep red-brown, partners with amber */
@@ -104,10 +104,10 @@ select,
    on-brand mint wash, applied site-wide. Inputs are never auto-select()ed
    either, so editing shows the caret line, not a highlighted block. */
 ::selection {
-  background: rgba(110, 231, 183, 0.25);
+  background: rgba(203, 163, 92, 0.25);
 }
 ::-moz-selection {
-  background: rgba(110, 231, 183, 0.25);
+  background: rgba(203, 163, 92, 0.25);
 }
 
 /* App-like selection: UI text can't be accidentally highlighted by a drag or
@@ -374,7 +374,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .input:focus {
   border-color: var(--mint);
-  background: rgba(110, 231, 183, 0.04);
+  background: rgba(203, 163, 92, 0.04);
 }
 
 /* ----- Links ----- */
@@ -453,7 +453,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 50%;
   pointer-events: none;
   z-index: 3;
-  box-shadow: 0 0 14px rgba(110, 231, 183, 0.45);
+  box-shadow: 0 0 14px rgba(203, 163, 92, 0.45);
   animation: pkSurgeRing 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes pkSurgeRing {
@@ -469,7 +469,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: -1.5px 0 0 -1.5px;
   border-radius: 50%;
   background: var(--mint);
-  box-shadow: 0 0 7px rgba(110, 231, 183, 0.9);
+  box-shadow: 0 0 7px rgba(203, 163, 92, 0.9);
   pointer-events: none;
   z-index: 3;
   animation: pkSpark 1.05s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;

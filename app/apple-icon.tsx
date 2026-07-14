@@ -12,14 +12,14 @@ export const contentType = 'image/png'
 // to the culet), solid fills on near-black. viewBox is tight around the gem.
 const GEM = `
 <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="282 328 460 460">
-  <path d="M392 372 L632 372 L724 470 L512 744 L300 470 Z" fill="#1f4d3d"/>
+  <path d="M392 372 L632 372 L724 470 L512 744 L300 470 Z" fill="#4A3A1C"/>
   <path d="M392 372 L300 470 L392 470 Z" fill="#A7F3D0"/>
   <path d="M392 372 L632 372 L632 470 L392 470 Z" fill="#C9F7E1"/>
   <path d="M632 372 L724 470 L632 470 Z" fill="#46B488"/>
-  <path d="M300 470 L392 470 L512 744 Z" fill="#6EE7B7"/>
+  <path d="M300 470 L392 470 L512 744 Z" fill="#CBA35C"/>
   <path d="M392 470 L512 470 L512 744 Z" fill="#46B488"/>
-  <path d="M512 470 L632 470 L512 744 Z" fill="#1f4d3d"/>
-  <path d="M632 470 L724 470 L512 744 Z" fill="#1f4d3d"/>
+  <path d="M512 470 L632 470 L512 744 Z" fill="#4A3A1C"/>
+  <path d="M632 470 L724 470 L512 744 Z" fill="#4A3A1C"/>
 </svg>`
 
 export default function AppleIcon() {

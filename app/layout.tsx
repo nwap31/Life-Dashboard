@@ -1,16 +1,19 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Instrument_Serif, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { DM_Sans, Fraunces, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({
+// Body face — DM Sans reads warmer and rounder than Inter, softening the whole
+// chrome. Keeps the --font-inter variable name so globals.css references still resolve.
+const bodySans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 })
 
-const instrumentSerif = Instrument_Serif({
+// Editorial display face — Fraunces is a warm, characterful serif (with a real
+// italic) that suits the earthy palette far better than Instrument Serif.
+const displaySerif = Fraunces({
   subsets: ['latin'],
-  weight: '400',
   style: ['normal', 'italic'],
   variable: '--font-serif',
   display: 'swap',
@@ -72,7 +75,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${instrumentSerif.variable} ${hankenGrotesk.variable} ${jetBrainsMono.variable}`}
+      className={`${bodySans.variable} ${displaySerif.variable} ${hankenGrotesk.variable} ${jetBrainsMono.variable}`}
     >
       <body>{children}</body>
     </html>
