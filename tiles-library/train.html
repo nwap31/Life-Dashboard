@@ -426,9 +426,33 @@ const PROGRAM = {
     { id:'calf_raise',      name:'Calf raise',            tier:3, sets:4, reps:12, kg:90,  rest:60  },
     { id:'hang_leg_raise',  name:'Hanging leg raise',     tier:'ab', sets:3, reps:12, kg:0, rest:60 },
   ]},
+  cardio: { name:'Cardio', type:'Conditioning', exercises:[
+    { id:'incline_treadmill', name:'Incline treadmill',   tier:1,   sets:1, reps:1,  kg:0,    rest:0   },
+    { id:'hang_leg_raise',    name:'Hanging leg raise',    tier:'ab', sets:3, reps:15, kg:0,   rest:60  },
+    { id:'cable_crunch',      name:'Cable crunch',         tier:'ab', sets:3, reps:15, kg:32.5, rest:60 },
+    { id:'russian_twist',     name:'Russian twist',        tier:'ab', sets:3, reps:20, kg:10,  rest:45  },
+    { id:'plank',             name:'Plank',                tier:'ab', sets:3, reps:1,  kg:0,    rest:45  },
+  ]},
+  upper: { name:'Upper', type:'Hypertrophy', exercises:[
+    { id:'bench_bb',        name:'Barbell bench',        tier:1, sets:3, reps:8,  kg:80,   rest:150 },
+    { id:'bb_row',          name:'Barbell row',          tier:1, sets:3, reps:8,  kg:80,   rest:150 },
+    { id:'standing_ohp',    name:'Standing barbell OHP', tier:2, sets:3, reps:10, kg:47.5, rest:120 },
+    { id:'lat_pulldown',    name:'Lat pulldown',         tier:2, sets:3, reps:10, kg:64,   rest:120 },
+    { id:'incl_db_press',   name:'Incline DB press',     tier:2, sets:3, reps:12, kg:30,   perHand:true, rest:90 },
+    { id:'bb_curl',         name:'Barbell curl',         tier:3, sets:3, reps:12, kg:32.5, rest:60  },
+    { id:'tri_pushdown',    name:'Tricep rope pushdown', tier:3, sets:3, reps:12, kg:27.5, rest:60  },
+  ]},
+  lower: { name:'Lower', type:'Hypertrophy', exercises:[
+    { id:'back_squat',      name:'Barbell back squat',   tier:1, sets:3, reps:8,  kg:110, rest:180 },
+    { id:'rdl',             name:'Romanian deadlift',     tier:1, sets:3, reps:10, kg:95,  rest:150 },
+    { id:'leg_press',       name:'Leg press',             tier:2, sets:3, reps:12, kg:190, rest:120 },
+    { id:'lying_leg_curl',  name:'Lying leg curl',        tier:3, sets:3, reps:12, kg:50,  rest:75  },
+    { id:'leg_ext',         name:'Leg extension',         tier:3, sets:3, reps:15, kg:55,  rest:60  },
+    { id:'calf_raise',      name:'Calf raise',            tier:3, sets:4, reps:15, kg:90,  rest:45  },
+  ]},
   rest: { name:'Rest', restDay:true, exercises:[] },
 };
-const ORDER = ['push','pull','legs','rest'];
+const ORDER = ['push','pull','legs','cardio','upper','lower','rest'];
 
 /* form reference + swap library (cues for the ⓘ button + swap options) */
 const LIB = {
