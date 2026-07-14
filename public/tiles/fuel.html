@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Fuel</title>
 <!--
-  FUEL — almost nothing, on purpose. One number (water today), one button.
-  The week draws itself underneath. Everything else this tile could become
-  (macros, meals, caffeine) gets built WITH the mentor, on top of this.
-  Store: { water: { 'YYYY-MM-DD': count } } — /sweep and save_data can file
-  straight into it.
+  FUEL — two tabs: Calories (toward Nolan's 2,700 maintain target) and Water.
+  Calories: quick-add chips + a custom amount, a progress bar, and the week.
+  Water: the original one-tap glass tracker, untouched.
+  Store: { kcal: { 'YYYY-MM-DD': total }, water: { 'YYYY-MM-DD': glasses } }
+  — /sweep and save_data can file straight into either.
 -->
 <style>
   :root{
     --bg:#050506;--fg:#ededf0;--brand:#6EE7B7;--brand-soft:rgba(110,231,183,.08);
-    --muted:#84848c;--muted-strong:#a8a8b0;--border:#1d1d22;
+    --muted:#84848c;--muted-strong:#a8a8b0;--border:#1d1d22;--border-strong:#2a2a31;
+    --warn:#e0a94f;--low:#ff8b8b;
     --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
     --serif:Georgia,'Times New Roman',serif;
     --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
@@ -38,11 +39,33 @@
   h1{font-size:24px;font-weight:600;letter-spacing:-.01em;text-align:left}
   .sub{color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:6px 0 0;text-align:left}
 
-  .well{margin-top:44px}
+  .tabs{display:flex;gap:6px;justify-content:center;margin-top:24px}
+  .tab{padding:8px 20px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s}
+  .tab:hover{color:#fff;border-color:var(--muted)}
+  .tab.on{color:#04140d;background:var(--brand);border-color:var(--brand)}
+
+  .well{margin-top:30px}
   .kick{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--brand)}
-  .count{font-family:var(--serif);font-style:italic;font-size:clamp(72px,18vw,110px);line-height:1;color:#fff;margin-top:10px;
+  .count{font-family:var(--serif);font-style:italic;font-size:clamp(64px,15vw,100px);line-height:1;color:#fff;margin-top:8px;
     text-shadow:0 0 44px rgba(110,231,183,.25)}
   .of{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .of b{color:var(--brand-soft)}
+  .of .over{color:var(--warn)}
+
+  .ptrack{height:6px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:20px}
+  .pfill{height:100%;border-radius:999px;background:linear-gradient(90deg,#3ddc97,var(--brand));transition:width .5s var(--ease)}
+  .pfill.over{background:linear-gradient(90deg,var(--warn),#e0894f)}
+
+  .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:24px}
+  .chip{padding:11px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted-strong);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+  .chip:hover{color:#fff;border-color:var(--muted)}
+  .kIn{display:flex;gap:8px;justify-content:center;margin-top:14px}
+  .kIn input{width:130px;background:rgba(255,255,255,.03);border:1px solid var(--border-strong);border-radius:999px;padding:10px 16px;color:var(--fg);font:inherit;text-align:center;outline:none}
+  .kIn input:focus{border-color:var(--brand)}
+  .kIn button{padding:10px 18px;border-radius:999px;border:none;background:linear-gradient(180deg,#8df0c9,var(--brand));color:#04140d;font-weight:700;cursor:pointer}
+  .clear{margin-top:16px;background:none;border:none;color:var(--muted);font-size:9px;cursor:pointer;font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase}
+  .clear:hover{color:var(--low)}
+
   .btnRow{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:30px}
   .minus{width:46px;height:46px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:20px;cursor:pointer;transition:all .15s}
   .minus:hover{color:#fff;border-color:var(--muted)}
@@ -51,7 +74,7 @@
   .glass:hover{transform:translateY(-1px)}
   .glass:active{transform:scale(.97)}
 
-  .week{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin-top:52px;height:64px}
+  .week{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin-top:40px;height:64px}
   .day{display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
   .bar{width:16px;border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,var(--brand),rgba(110,231,183,.25));min-height:3px;transition:height .5s var(--ease)}
   .bar.zero{background:var(--border)}
@@ -64,39 +87,78 @@
 </head>
 <body>
 <div class="shell">
-<div class="starterTag">✦ starter — the value is what you build · the videos show how</div>
   <h1>Fuel</h1>
-  <p class="sub">water today · that's it — build the rest with your mentor</p>
+  <p class="sub">calories + water · toward 2,700 kcal</p>
   <div class="well" id="app"></div>
 </div>
 <script>
-const GOAL=8;
+const WATER_GOAL=8;
+const KCAL_TARGET=2700; /* Nolan's maintain target — see lib/tiles/profile.ts */
 let store={};
+let view='kcal';
 function key(d){const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
 function persist(){window.Vitality.save(store)}
-function today(){if(!store.water||typeof store.water!=='object')store.water={};return store.water}
-function render(){
-  const w=today(),n=w[key()]||0;
+function water(){if(!store.water||typeof store.water!=='object')store.water={};return store.water}
+function kcal(){if(!store.kcal||typeof store.kcal!=='object')store.kcal={};return store.kcal}
+
+function weekBars(map,goal){
   let bars='';
   for(let i=6;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
-    const c=w[key(d)]||0,h=Math.max(3,Math.min(64,(c/GOAL)*64));
+    const c=map[key(d)]||0,h=Math.max(3,Math.min(64,(c/goal)*64));
     const lab=i===0?'today':['SU','MO','TU','WE','TH','FR','SA'][d.getDay()];
     bars+='<div class="day"><div class="bar'+(c?'':' zero')+'" style="height:'+h+'px" title="'+c+'"></div><span class="dLab'+(i===0?' today':'')+'">'+lab+'</span></div>';
   }
-  document.getElementById('app').innerHTML=
-    '<div class="kick">✦ water</div>'
+  return '<div class="week">'+bars+'</div>';
+}
+function tabs(){
+  return '<div class="tabs">'
+    +'<button class="tab'+(view==='kcal'?' on':'')+'" data-view="kcal">Calories</button>'
+    +'<button class="tab'+(view==='water'?' on':'')+'" data-view="water">Water</button></div>';
+}
+function renderKcal(){
+  const k=kcal(),n=k[key()]||0,left=KCAL_TARGET-n,pct=Math.min(100,Math.round(n/KCAL_TARGET*100)),over=n>KCAL_TARGET;
+  const chips=[200,400,600,800].map(v=>'<button class="chip" data-kadd="'+v+'">+'+v+'</button>').join('');
+  return tabs()
+    +'<div class="kick">✦ calories</div>'
+    +'<div class="count">'+n.toLocaleString('en-US')+'</div>'
+    +'<div class="of">of '+KCAL_TARGET.toLocaleString('en-US')+' · '+(over?'<span class="over">'+(n-KCAL_TARGET).toLocaleString('en-US')+' over</span>':left.toLocaleString('en-US')+' left')+'</div>'
+    +'<div class="ptrack"><div class="pfill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>'
+    +'<div class="chips">'+chips+'</div>'
+    +'<div class="kIn"><input id="kcalIn" type="text" inputmode="numeric" placeholder="add kcal" autocomplete="off"/><button data-kaddin>Add</button></div>'
+    +(n?'<button class="clear" data-kclear>clear today</button>':'')
+    +weekBars(k,KCAL_TARGET)
+    +'<p class="foot">toward your maintain target · the mentor notices the pattern</p>';
+}
+function renderWater(){
+  const w=water(),n=w[key()]||0;
+  return tabs()
+    +'<div class="kick">✦ water</div>'
     +'<div class="count">'+n+'</div>'
-    +'<div class="of">of '+GOAL+' today</div>'
+    +'<div class="of">of '+WATER_GOAL+' today</div>'
     +'<div class="btnRow"><button class="minus" data-d="-1" aria-label="Remove one">−</button><button class="glass" data-d="1">+ Log a glass</button></div>'
-    +'<div class="week">'+bars+'</div>'
-    +'<p class="foot">feeds your peak score · the mentor notices the pattern</p>';
+    +weekBars(w,WATER_GOAL)
+    +'<p class="foot">hydration feeds recovery · the mentor notices the pattern</p>';
+}
+function render(){
+  document.getElementById('app').innerHTML = view==='water'?renderWater():renderKcal();
 }
 document.addEventListener('click',e=>{
-  const b=e.target.closest('[data-d]');if(!b)return;
-  const w=today(),k=key();
-  w[k]=Math.max(0,(w[k]||0)+parseInt(b.getAttribute('data-d'),10));
-  persist();render();
+  const tb=e.target.closest('[data-view]');
+  if(tb){view=tb.getAttribute('data-view');render();return}
+  const wb=e.target.closest('[data-d]');
+  if(wb){const w=water(),k=key();w[k]=Math.max(0,(w[k]||0)+parseInt(wb.getAttribute('data-d'),10));persist();render();return}
+  const ka=e.target.closest('[data-kadd]');
+  if(ka){const k=kcal(),d=key();k[d]=Math.max(0,(k[d]||0)+parseInt(ka.getAttribute('data-kadd'),10));persist();render();return}
+  if(e.target.closest('[data-kaddin]')){
+    const inp=document.getElementById('kcalIn'),v=parseInt((inp&&inp.value||'').replace(/[^0-9-]/g,''),10);
+    if(isFinite(v)&&v!==0){const k=kcal(),d=key();k[d]=Math.max(0,(k[d]||0)+v);persist();render();}
+    return;
+  }
+  if(e.target.closest('[data-kclear]')){const k=kcal(),d=key();delete k[d];persist();render();return}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target&&e.target.id==='kcalIn'){e.preventDefault();const b=document.querySelector('[data-kaddin]');if(b)b.click();}
 });
 if(!window.Vitality){window.Vitality={save:function(d){try{localStorage.setItem('v:prev:fuel',JSON.stringify(d));}catch(e){}return Promise.resolve(true);},load:function(){try{return Promise.resolve(JSON.parse(localStorage.getItem('v:prev:fuel')||'{}'));}catch(e){return Promise.resolve({});}}};}
 (async()=>{const d=await window.Vitality.load();store=(d&&typeof d==='object'&&!Array.isArray(d))?d:{};render();})();
