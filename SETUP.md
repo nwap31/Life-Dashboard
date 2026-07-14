@@ -6,8 +6,7 @@
        → your code is saved and safe; the door to going live
 - [x] 3. Vercel — LIVE at life-dashboard-jet-eta.vercel.app         DONE
        → every push to GitHub now auto-updates the live site
-- [ ] 4. Supabase — new project, run supabase/sync.sql +
-       tiles.sql, add the two NEXT_PUBLIC keys                     OPTIONAL
+- [x] 4. Supabase — tables live, keys wired (local + Vercel)        DONE
        → memory: data follows you across devices instead of one browser
 - [ ] 5. Phone — open your live URL, Share → Add to Home Screen    OPTIONAL
        → the dashboard as an app in your pocket
