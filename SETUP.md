@@ -2,7 +2,7 @@
 
 - [x] 1. The board, locally — npm install + npm run dev            REQUIRED
        → your dashboard, running on this computer
-- [ ] 2. GitHub — gh auth login (one browser sign-in; I do the git) RECOMMENDED
+- [x] 2. GitHub — pushed to github.com/nwap31/Life-Dashboard          DONE
        → your code is saved and safe; the door to going live
 - [ ] 3. Vercel — import the repo, click Deploy                    RECOMMENDED
        → your dashboard LIVE at your own URL; every push auto-updates it
