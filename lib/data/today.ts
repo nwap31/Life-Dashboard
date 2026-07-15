@@ -15,6 +15,8 @@ export interface Todo {
   id: string
   text: string
   done: boolean
+  /** Set when this todo was pulled in from Todoist rather than typed in the app. */
+  source?: 'todoist'
 }
 
 export interface CalendarEvent {

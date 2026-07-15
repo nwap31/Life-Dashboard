@@ -59,6 +59,10 @@ export default function TodayPage() {
     persist({ ...data, todos: data.todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) })
   }
 
+  const removeTodo = (id: string) => {
+    persist({ ...data, todos: data.todos.filter((t) => t.id !== id) })
+  }
+
   const toggleHabit = (id: string) => {
     const habits = data.habits.map((h) => (h.id === id ? { ...h, done: !h.done } : h))
     persist({ ...data, habits })
@@ -91,10 +95,26 @@ export default function TodayPage() {
                     <p className={s.empty}>Nothing on the list yet.</p>
                   ) : (
                     data.todos.map((t) => (
-                      <label key={t.id} className={`${s.checkRow} ${t.done ? s.checkRowDone : ''}`}>
-                        <input type="checkbox" checked={t.done} onChange={() => toggleTodo(t.id)} />
-                        {t.text}
-                      </label>
+                      <div
+                        key={t.id}
+                        className={`${s.checkRow} ${t.done ? s.checkRowDone : ''}`}
+                        style={{ justifyContent: 'space-between' }}
+                      >
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flex: 1 }}>
+                          <input type="checkbox" checked={t.done} onChange={() => toggleTodo(t.id)} />
+                          {t.text}
+                          {t.source === 'todoist' && (
+                            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>via Todoist</span>
+                          )}
+                        </label>
+                        <button
+                          className="btn-link"
+                          style={{ padding: 'var(--space-1) var(--space-2)' }}
+                          onClick={() => removeTodo(t.id)}
+                        >
+                          delete
+                        </button>
+                      </div>
                     ))
                   )}
                 </div>
