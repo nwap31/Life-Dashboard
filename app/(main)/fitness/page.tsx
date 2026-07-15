@@ -5,10 +5,11 @@ import s from '../section.module.css'
 import f from './fitness.module.css'
 import { loadFitness, saveFitness, emptyDayLog, presetExercises, PRESETS, type FitnessData, type Preset } from '@/lib/data/fitness'
 import { loadNutrition, saveNutrition, type NutritionData } from '@/lib/data/nutrition'
+import { loadWater, saveWater, DAILY_TARGET_OZ, type WaterData } from '@/lib/data/water'
 import { profile } from '@/lib/tiles/profile'
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-const TABS = ['Split', 'Nutrition'] as const
+const TABS = ['Split', 'Nutrition', 'Vitals'] as const
 type Tab = (typeof TABS)[number]
 
 function pad(n: number) {
@@ -264,6 +265,54 @@ function SplitTab() {
   )
 }
 
+function WaterSection() {
+  const [data, setData] = useState<WaterData | null>(null)
+
+  useEffect(() => {
+    loadWater().then(setData)
+  }, [])
+
+  if (!data) return null
+
+  const today = todayISO()
+  const todayOz = data.log[today] ?? 0
+  const pct = Math.min(100, Math.round((todayOz / DAILY_TARGET_OZ) * 100))
+
+  const persist = (oz: number) => {
+    const next = { log: { ...data.log, [today]: Math.max(0, oz) } }
+    setData(next)
+    saveWater(next)
+  }
+
+  return (
+    <section className={s.section}>
+      <div className={s.sectionTitle}>Water</div>
+      <div className={s.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-4)' }}>
+          <div className={s.statValue}>{todayOz} oz</div>
+          <span style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
+            {pct}% of {DAILY_TARGET_OZ} oz (1 gal)
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          <button className="btn btn-ghost" onClick={() => persist(todayOz + 8)}>
+            + 8 oz
+          </button>
+          <button className="btn btn-ghost" onClick={() => persist(todayOz + 16)}>
+            + 16 oz
+          </button>
+          <button className="btn btn-ghost" onClick={() => persist(todayOz + 32)}>
+            + 32 oz
+          </button>
+          <button className="btn-link" onClick={() => persist(0)}>
+            reset
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function NutritionTab() {
   const [data, setData] = useState<NutritionData | null>(null)
   const [date, setDate] = useState(todayISO())
@@ -299,6 +348,8 @@ function NutritionTab() {
 
   return (
     <>
+      <WaterSection />
+
       <div className={s.statRow} style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
         <div className={s.stat}>
           <div className={s.statLabel}>Target</div>
@@ -380,6 +431,77 @@ function NutritionTab() {
   )
 }
 
+interface GarminVitals {
+  recovery?: number
+  sleepHours?: number
+  hrv?: number
+  restingHr?: number
+  error?: string
+}
+
+function readinessLabel(recovery: number): string {
+  if (recovery >= 67) return 'Primed — green light to push today.'
+  if (recovery >= 34) return 'Moderate — train, but respect the RPE.'
+  return 'Low — prioritize recovery today.'
+}
+
+function VitalsTab() {
+  const [vitals, setVitals] = useState<GarminVitals | null>(null)
+
+  useEffect(() => {
+    fetch('/api/vitals/garmin')
+      .then((r) => r.json())
+      .then(setVitals)
+      .catch(() => setVitals({ error: 'fetch_failed' }))
+  }, [])
+
+  if (!vitals) return null
+
+  if (vitals.error) {
+    return (
+      <section className={s.section}>
+        <div className={s.card}>
+          <div className={s.sectionTitle}>Not connected yet</div>
+          <p className={s.empty}>
+            Recovery, sleep, HRV, and resting heart rate will show up here once your Garmin account is connected —
+            ask your mentor to help set up Garmin API access.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <>
+      <div className={s.statRow}>
+        <div className={s.stat}>
+          <div className={s.statLabel}>Recovery</div>
+          <div className={s.statValue}>{vitals.recovery ?? '—'}</div>
+        </div>
+        <div className={s.stat}>
+          <div className={s.statLabel}>Sleep</div>
+          <div className={s.statValue}>{vitals.sleepHours != null ? `${vitals.sleepHours}h` : '—'}</div>
+        </div>
+        <div className={s.stat}>
+          <div className={s.statLabel}>HRV</div>
+          <div className={s.statValue}>{vitals.hrv ?? '—'}</div>
+        </div>
+        <div className={s.stat}>
+          <div className={s.statLabel}>Resting HR</div>
+          <div className={s.statValue}>{vitals.restingHr ?? '—'}</div>
+        </div>
+      </div>
+
+      {vitals.recovery != null && (
+        <section className={s.section}>
+          <div className={s.sectionTitle}>Today&apos;s readiness</div>
+          <div className={s.card}>{readinessLabel(vitals.recovery)}</div>
+        </section>
+      )}
+    </>
+  )
+}
+
 export default function FitnessPage() {
   const [tab, setTab] = useState<Tab>('Split')
 
@@ -397,7 +519,7 @@ export default function FitnessPage() {
         ))}
       </div>
 
-      {tab === 'Split' ? <SplitTab /> : <NutritionTab />}
+      {tab === 'Split' ? <SplitTab /> : tab === 'Nutrition' ? <NutritionTab /> : <VitalsTab />}
     </div>
   )
 }
