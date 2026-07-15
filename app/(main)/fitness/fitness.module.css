@@ -1,0 +1,83 @@
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: var(--space-2);
+}
+
+.day {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: var(--text-sm);
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease), background var(--duration) var(--ease);
+}
+
+.day:hover {
+  border-color: var(--border-strong);
+}
+
+.dayEmpty {
+  visibility: hidden;
+  cursor: default;
+}
+
+.daySelected {
+  border-color: var(--mint);
+  background: var(--mint-deep);
+}
+
+.dayPreset {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mint-hover);
+  font-weight: 600;
+}
+
+.presetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.presetChip {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: var(--text-sm);
+  color: var(--fg);
+}
+
+.presetChipActive {
+  background: var(--mint);
+  color: var(--mint-ink);
+  border-color: var(--mint);
+  font-weight: 600;
+}
+
+.exerciseRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
