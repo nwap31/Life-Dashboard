@@ -5,11 +5,13 @@
   --bg: #FBF9F5;             /* warm off-white canvas */
   --bg-elevated: #FFFFFF;
   --fg: #221E17;             /* warm dark-brown ink */
-  --mint: #A9713C;           /* accent: deeper ochre so it's readable on paper */
-  --mint-hover: #8F5D2F;
-  --mint-deep: #EFE3C8;      /* soft gold tint partner (light theme) */
-  --mint-glow: rgba(169, 113, 60, 0.22);
-  --mint-ink: #FFFFFF;       /* text/icons on the ochre accent fill */
+  --mint: #9C5A2C;           /* accent: deeper rust (Aesthetic Pass) */
+  --mint-hover: #7C4520;
+  --mint-deep: #E8D2AE;      /* richer tan pill fill for the active nav item */
+  --mint-glow: rgba(156, 90, 44, 0.24);
+  --mint-ink: #FFFFFF;       /* text/icons on the rust accent fill */
+  --olive: #5F6E42;          /* secondary earthy accent — nav dots, variety */
+  --olive-deep: #4B5735;
   --amber: #C77B0E;          /* deepened for contrast on light */
   --amber-warm: #a85e06;
   --wine: #7c2d12;
@@ -20,6 +22,7 @@
   --border-strong: rgba(34, 30, 23, 0.22);
   --card: rgba(34, 30, 23, 0.025);
   --card-elevated: #FFFFFF;
+  --shadow-card: 0 1px 2px rgba(34, 30, 23, 0.04), 0 6px 16px rgba(34, 30, 23, 0.06);
 
   /* Spacing */
   --space-1: 0.25rem;

@@ -30,6 +30,7 @@
 .brandName {
   font-family: var(--font-serif), serif;
   font-size: var(--text-lg);
+  font-weight: 600;
   color: var(--fg);
   letter-spacing: -0.01em;
 }
@@ -61,15 +62,15 @@
 .navItemActive {
   background: var(--mint-deep);
   color: var(--mint-hover);
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
 }
 
-.navIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
+.navDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 @media (max-width: 760px) {

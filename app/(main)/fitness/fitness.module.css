@@ -3,6 +3,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
+  box-shadow: var(--shadow-card);
 }
 
 .calendarHead {
@@ -85,10 +86,10 @@
   cursor: default;
 }
 
-/* Faint brown wash marking today's date on the grid, independent of selection. */
+/* Warm rust wash marking today's date on the grid, independent of selection. */
 .dayToday {
-  background: rgba(169, 113, 60, 0.1);
-  border-color: rgba(169, 113, 60, 0.28);
+  background: rgba(156, 90, 44, 0.14);
+  border-color: rgba(156, 90, 44, 0.34);
 }
 
 .dayToday .dayNum {

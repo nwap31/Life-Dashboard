@@ -19,8 +19,10 @@
 .title {
   font-family: var(--font-serif), serif;
   font-size: var(--text-3xl);
+  font-weight: 700;
   color: var(--fg);
   margin-top: var(--space-1);
+  letter-spacing: -0.01em;
 }
 
 .section {
@@ -37,10 +39,11 @@
 }
 
 .card {
-  background: var(--card);
+  background: var(--card-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
+  box-shadow: var(--shadow-card);
 }
 
 .rowList {
@@ -106,10 +109,11 @@
 }
 
 .stat {
-  background: var(--card);
+  background: var(--card-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
+  box-shadow: var(--shadow-card);
 }
 
 .statLabel {
