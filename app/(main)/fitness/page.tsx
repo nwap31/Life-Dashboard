@@ -77,7 +77,7 @@ export default function FitnessPage() {
   const addExercise = () => {
     const name = newExercise.trim()
     if (!name || !dayLog) return
-    updateDay({ exercises: [...dayLog.exercises, { id: crypto.randomUUID(), name, sets: [] }] })
+    updateDay({ exercises: [...dayLog.exercises, { id: crypto.randomUUID(), name, type: 'sets', sets: [] }] })
     setNewExercise('')
   }
 
@@ -98,6 +98,13 @@ export default function FitnessPage() {
           ? { ...ex, sets: ex.sets.map((st, i) => (i === idx ? { ...st, [field]: value } : st)) }
           : ex,
       ),
+    })
+  }
+
+  const toggleExerciseDone = (exerciseId: string) => {
+    if (!dayLog) return
+    updateDay({
+      exercises: dayLog.exercises.map((ex) => (ex.id === exerciseId ? { ...ex, done: !ex.done } : ex)),
     })
   }
 
@@ -168,14 +175,37 @@ export default function FitnessPage() {
               ))}
             </div>
 
-            <div className="field" style={{ maxWidth: 200, marginBottom: 'var(--space-4)' }}>
-              <span className="label">Calories (target {kcalTarget})</span>
-              <input
-                className="input"
-                type="number"
-                value={dayLog.calories ?? ''}
-                onChange={(e) => updateDay({ calories: Number(e.target.value) })}
-              />
+            <div className={s.grid2} style={{ marginBottom: 'var(--space-5)' }}>
+              <div className="field" style={{ maxWidth: 200 }}>
+                <span className="label">Calories (target {kcalTarget})</span>
+                <input
+                  className="input"
+                  type="number"
+                  value={dayLog.calories ?? ''}
+                  onChange={(e) => updateDay({ calories: Number(e.target.value) })}
+                />
+              </div>
+              <div className="field">
+                <span className="label">Supplement (optional)</span>
+                <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
+                  <label className={f.exerciseRow} style={{ borderBottom: 'none', padding: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={dayLog.supplementCardio ?? false}
+                      onChange={(e) => updateDay({ supplementCardio: e.target.checked })}
+                    />
+                    Did cardio
+                  </label>
+                  <label className={f.exerciseRow} style={{ borderBottom: 'none', padding: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={dayLog.supplementAbs ?? false}
+                      onChange={(e) => updateDay({ supplementAbs: e.target.checked })}
+                    />
+                    Did abs
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -189,36 +219,46 @@ export default function FitnessPage() {
             {dayLog.exercises.length === 0 ? (
               <p className={s.empty}>No exercises logged.</p>
             ) : (
-              dayLog.exercises.map((ex) => (
-                <div key={ex.id} style={{ marginBottom: 'var(--space-3)' }}>
-                  <strong style={{ fontSize: 'var(--text-sm)' }}>{ex.name}</strong>
-                  {ex.sets.map((st, i) => (
-                    <div key={i} className={f.exerciseRow}>
-                      <span>Set {i + 1}</span>
-                      <input
-                        className="input"
-                        style={{ width: 80 }}
-                        type="number"
-                        placeholder="reps"
-                        value={st.reps}
-                        onChange={(e) => updateSet(ex.id, i, 'reps', Number(e.target.value))}
-                      />
-                      <span>×</span>
-                      <input
-                        className="input"
-                        style={{ width: 90 }}
-                        type="number"
-                        placeholder="lb"
-                        value={st.weight}
-                        onChange={(e) => updateSet(ex.id, i, 'weight', Number(e.target.value))}
-                      />
-                    </div>
-                  ))}
-                  <button className="btn-link" onClick={() => addSet(ex.id)}>
-                    + add set
-                  </button>
-                </div>
-              ))
+              dayLog.exercises.map((ex) =>
+                ex.type === 'check' ? (
+                  <label key={ex.id} className={f.exerciseRow}>
+                    <input type="checkbox" checked={ex.done ?? false} onChange={() => toggleExerciseDone(ex.id)} />
+                    {ex.name}
+                  </label>
+                ) : (
+                  <div key={ex.id} style={{ marginBottom: 'var(--space-3)' }}>
+                    <strong style={{ fontSize: 'var(--text-sm)' }}>
+                      {ex.name}
+                      {ex.targetReps && <span className={f.targetReps}> · target {ex.targetReps}</span>}
+                    </strong>
+                    {ex.sets.map((st, i) => (
+                      <div key={i} className={f.exerciseRow}>
+                        <span>Set {i + 1}</span>
+                        <input
+                          className="input"
+                          style={{ width: 80 }}
+                          type="number"
+                          placeholder="reps"
+                          value={st.reps}
+                          onChange={(e) => updateSet(ex.id, i, 'reps', Number(e.target.value))}
+                        />
+                        <span>×</span>
+                        <input
+                          className="input"
+                          style={{ width: 90 }}
+                          type="number"
+                          placeholder="lb"
+                          value={st.weight}
+                          onChange={(e) => updateSet(ex.id, i, 'weight', Number(e.target.value))}
+                        />
+                      </div>
+                    ))}
+                    <button className="btn-link" onClick={() => addSet(ex.id)}>
+                      + add set
+                    </button>
+                  </div>
+                ),
+              )
             )}
             <div className={s.inlineForm}>
               <input

@@ -151,3 +151,9 @@
   border-bottom: 1px solid var(--border);
   font-size: var(--text-sm);
 }
+
+.targetReps {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: var(--text-xs);
+}

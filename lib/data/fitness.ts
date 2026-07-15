@@ -12,16 +12,29 @@ export interface SetEntry {
   weight: number
 }
 
+/**
+ * 'sets' = the usual sets x reps-range x weight exercise (weight logged per set).
+ * 'check' = a single done/not-done item (e.g. "Cardio (30 min)") — no sets to log.
+ */
+export type ExerciseType = 'sets' | 'check'
+
 export interface Exercise {
   id: string
   name: string
-  sets: SetEntry[]
+  type: ExerciseType
+  /** Target rep range as written on the plan, e.g. "6-8" — display only, not enforced. */
+  targetReps?: string
+  sets: SetEntry[] // used when type === 'sets'
+  done?: boolean // used when type === 'check'
 }
 
 export interface DayLog {
   preset?: Preset
   exercises: Exercise[]
   calories?: number
+  /** Optional supplement checkboxes — available on ANY day, not just Cardio+Abs. */
+  supplementCardio?: boolean
+  supplementAbs?: boolean
 }
 
 export interface FitnessData {
@@ -49,72 +62,62 @@ export function emptyDayLog(): DayLog {
   return { exercises: [] }
 }
 
-/** name + per-set {reps, weight} — weight in lb, matches profile().units. */
-type ExerciseTemplate = { name: string; sets: SetEntry[] }
+type ExerciseTemplate = { name: string; type: ExerciseType; sets: number; targetReps?: string }
 
-function reps(count: number, reps: number, weight: number): SetEntry[] {
-  return Array.from({ length: count }, () => ({ reps, weight }))
+/** Build the starting (unlogged) sets for a template — reps/weight fill in as you go. */
+function blankSets(count: number): SetEntry[] {
+  return Array.from({ length: count }, () => ({ reps: 0, weight: 0 }))
 }
 
 /**
- * Real numbers carried over from the old Train tile (Push/Pull/Legs), converted
- * kg -> lb. Upper/Lower/Cardio+Abs are reasonable starting templates (weight 0 —
- * fill in your own working weight the first time you log them). Rest is empty.
- * Applied fresh (new ids) whenever a preset is picked on a day with no exercises yet.
+ * Your split, as given — set counts + target rep ranges, weight left blank to
+ * fill in as you log. Legs and Lower are left blank for now. Applied fresh
+ * (new ids) whenever a preset is picked on a day with no exercises yet.
  */
 const PRESET_EXERCISES: Record<Preset, ExerciseTemplate[]> = {
   Push: [
-    { name: 'Barbell bench', sets: reps(4, 6, 185) },
-    { name: 'Standing barbell OHP', sets: reps(3, 8, 110) },
-    { name: 'Incline DB press', sets: reps(3, 10, 70) },
-    { name: 'Cable chest fly', sets: reps(3, 12, 40) },
-    { name: 'Cable lateral raise', sets: reps(4, 12, 20) },
-    { name: 'Tricep rope pushdown', sets: reps(3, 12, 60) },
-    { name: 'Overhead cable tri ext', sets: reps(3, 12, 50) },
+    { name: 'Incline Barbell Bench Press', type: 'sets', sets: 3, targetReps: '6-8' },
+    { name: 'Pec Dec', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Lateral Raises', type: 'sets', sets: 2, targetReps: '10-12' },
+    { name: 'Smith Machine Shoulder Press', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Single Arm Tricep Pushdowns', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Skull Crushers', type: 'sets', sets: 2, targetReps: '6-8' },
   ],
   Pull: [
-    { name: 'Conventional deadlift', sets: reps(3, 5, 310) },
-    { name: 'Weighted pull-ups', sets: reps(4, 8, 35) },
-    { name: 'Barbell row', sets: reps(3, 8, 175) },
-    { name: 'Lat pulldown', sets: reps(3, 10, 140) },
-    { name: 'Cable face pull', sets: reps(3, 15, 50) },
-    { name: 'Barbell curl', sets: reps(3, 10, 75) },
-    { name: 'Hammer curl', sets: reps(3, 12, 35) },
+    { name: 'Lat Pulldowns', type: 'sets', sets: 3, targetReps: '6-8' },
+    { name: 'Kelso Rows', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Lat Pullovers', type: 'sets', sets: 3, targetReps: '6-8' },
+    { name: 'Standing Bicep Curls', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Cable Preacher Curls', type: 'sets', sets: 2, targetReps: '6-8' },
   ],
-  Legs: [
-    { name: 'Barbell back squat', sets: reps(4, 6, 265) },
-    { name: 'Romanian deadlift', sets: reps(3, 8, 220) },
-    { name: 'Leg press', sets: reps(3, 10, 440) },
-    { name: 'Lying leg curl', sets: reps(3, 12, 110) },
-    { name: 'Leg extension', sets: reps(3, 12, 130) },
-    { name: 'Calf raise', sets: reps(4, 12, 200) },
-    { name: 'Hanging leg raise', sets: reps(3, 12, 0) },
+  Legs: [],
+  'Cardio+Abs': [
+    { name: 'Cardio (30 min)', type: 'check', sets: 0 },
+    { name: 'Oblique Twists', type: 'sets', sets: 3, targetReps: '10-12' },
+    { name: 'Leg Raises', type: 'sets', sets: 3, targetReps: '10-12' },
+    { name: 'Cable Crunches', type: 'sets', sets: 3, targetReps: '10-12' },
   ],
   Upper: [
-    { name: 'Incline DB press', sets: reps(3, 10, 0) },
-    { name: 'Seated cable row', sets: reps(3, 10, 0) },
-    { name: 'Cable lateral raise', sets: reps(3, 12, 0) },
-    { name: 'Cable face pull', sets: reps(3, 15, 0) },
-    { name: 'EZ bar curl', sets: reps(3, 10, 0) },
-    { name: 'Skull crushers', sets: reps(3, 12, 0) },
+    { name: 'Incline Barbell Bench Press', type: 'sets', sets: 3, targetReps: '6-8' },
+    { name: 'Pec Dec', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Weighted Pullups', type: 'sets', sets: 3, targetReps: '6-8' },
+    { name: 'Kelso Rows', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Lateral Raises', type: 'sets', sets: 3, targetReps: '10-12' },
+    { name: 'Skullcrushers', type: 'sets', sets: 2, targetReps: '6-8' },
+    { name: 'Preacher Curls', type: 'sets', sets: 2, targetReps: '6-8' },
   ],
-  Lower: [
-    { name: 'Goblet squat', sets: reps(3, 12, 0) },
-    { name: 'Walking lunges', sets: reps(3, 12, 0) },
-    { name: 'Lying leg curl', sets: reps(3, 12, 0) },
-    { name: 'Calf raise', sets: reps(4, 12, 0) },
-    { name: 'Hip thrust', sets: reps(3, 10, 0) },
-  ],
-  'Cardio+Abs': [
-    { name: 'Incline treadmill (min)', sets: reps(1, 20, 0) },
-    { name: 'Hanging leg raise', sets: reps(3, 12, 0) },
-    { name: 'Cable crunch', sets: reps(3, 15, 0) },
-    { name: 'Plank (sec)', sets: reps(3, 45, 0) },
-  ],
+  Lower: [],
   Rest: [],
 }
 
 /** Fresh exercises for a preset (new ids each call) — the day's starting log. */
 export function presetExercises(preset: Preset): Exercise[] {
-  return PRESET_EXERCISES[preset].map((t) => ({ id: crypto.randomUUID(), name: t.name, sets: t.sets.map((s) => ({ ...s })) }))
+  return PRESET_EXERCISES[preset].map((t) => ({
+    id: crypto.randomUUID(),
+    name: t.name,
+    type: t.type,
+    targetReps: t.targetReps,
+    sets: t.type === 'sets' ? blankSets(t.sets) : [],
+    done: t.type === 'check' ? false : undefined,
+  }))
 }
