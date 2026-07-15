@@ -134,34 +134,34 @@ export default function TodayPage() {
             </section>
 
             <section className={s.section}>
-              <div className={s.sectionTitle}>Calendar</div>
+              <div className={s.sectionTitle}>Habits</div>
               <div className={s.card}>
                 <div className={s.rowList}>
-                  {data.events.length === 0 ? (
-                    <p className={s.empty}>No events synced yet — ask your mentor to pull today&apos;s calendar.</p>
-                  ) : (
-                    data.events.map((e) => (
-                      <div key={e.id} className={s.checkRow}>
-                        <strong style={{ minWidth: 72, color: 'var(--mint-hover)' }}>{e.time}</strong>
-                        {e.title}
-                      </div>
-                    ))
-                  )}
+                  {data.habits.map((h) => (
+                    <label key={h.id} className={`${s.checkRow} ${h.done ? s.checkRowDone : ''}`}>
+                      <input type="checkbox" checked={h.done} onChange={() => toggleHabit(h.id)} />
+                      {h.label}
+                    </label>
+                  ))}
                 </div>
               </div>
             </section>
           </div>
 
           <section className={s.section}>
-            <div className={s.sectionTitle}>Habits</div>
+            <div className={s.sectionTitle}>Calendar</div>
             <div className={s.card}>
               <div className={s.rowList}>
-                {data.habits.map((h) => (
-                  <label key={h.id} className={`${s.checkRow} ${h.done ? s.checkRowDone : ''}`}>
-                    <input type="checkbox" checked={h.done} onChange={() => toggleHabit(h.id)} />
-                    {h.label}
-                  </label>
-                ))}
+                {data.events.length === 0 ? (
+                  <p className={s.empty}>No events synced yet — ask your mentor to pull today&apos;s calendar.</p>
+                ) : (
+                  data.events.map((e) => (
+                    <div key={e.id} className={s.checkRow}>
+                      <strong style={{ minWidth: 72, color: 'var(--mint-hover)' }}>{e.time}</strong>
+                      {e.title}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </section>
