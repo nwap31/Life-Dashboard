@@ -1,10 +1,9 @@
 /**
- * Trading page data — daily P&L, long/short, projected/realized RR, rules
- * discipline (clean/broke), and the pre-market procedure checklist. One
- * P&L entry per day; the page's hero is today's entry form, with history +
- * stats computed from `days[]` below it. Procedures reset daily like the
- * old Today-page ones did (moved here since they belong with the trading
- * routine, not the general daily snapshot).
+ * Trading page data — daily P&L, long/short, projected/realized RR, and
+ * rules discipline (clean/broke). One P&L entry per day; the page's hero
+ * is today's entry form, with history + stats computed from `days[]`
+ * below it. The trading rules list is static reference text, not stored
+ * data — it lives in TRADING_RULES below.
  */
 import { tileStore } from '@/lib/tiles/tileStore'
 
@@ -20,45 +19,22 @@ export interface TradingDay {
   rules: RulesStatus
 }
 
-export interface ProcedureStep {
-  id: string
-  text: string
-  done: boolean
-}
-
-export interface Procedure {
-  id: string
-  title: string
-  steps: ProcedureStep[]
-}
-
 export interface TradingData {
   days: TradingDay[]
-  procedures: Procedure[]
-  /** ISO date the procedure checklist was last synced for — steps reset when stale. */
-  proceduresSyncedDate?: string
 }
 
 export const SLOT = 'trading'
 const USER_ID = 'me'
 
-const DEFAULT_PROCEDURES: Procedure[] = [
-  {
-    id: 'p-premarket',
-    title: 'Pre-market prep',
-    steps: [
-      { id: 's1', text: 'Mark key levels', done: false },
-      { id: 's2', text: 'Check bias (HTF trend)', done: false },
-      { id: 's3', text: 'Review overnight news', done: false },
-    ],
-  },
+export const TRADING_RULES: string[] = [
+  '1. Liquidity Sweep',
+  '2. Aggressive Move up or Down',
+  '3. Retracement into OTE',
+  '3a. PO3 sized FVG within the OTE zone',
+  '4. Enter with TP at 0 and SL at 1',
 ]
 
-const DEFAULT_DATA: TradingData = { days: [], procedures: DEFAULT_PROCEDURES }
-
-function todayISO(): string {
-  return new Date().toISOString().slice(0, 10)
-}
+const DEFAULT_DATA: TradingData = { days: [] }
 
 export async function loadTrading(): Promise<TradingData> {
   const raw = await tileStore.loadData(USER_ID, SLOT)
@@ -67,24 +43,11 @@ export async function loadTrading(): Promise<TradingData> {
       ? (raw as TradingData)
       : DEFAULT_DATA
 
-  const merged: TradingData = {
-    days: data.days ?? [],
-    procedures: data.procedures ?? DEFAULT_PROCEDURES,
-    proceduresSyncedDate: data.proceduresSyncedDate,
-  }
-
-  const today = todayISO()
-  if (merged.proceduresSyncedDate !== today) {
-    merged.procedures = merged.procedures.map((p) => ({
-      ...p,
-      steps: p.steps.map((s) => ({ ...s, done: false })),
-    }))
-  }
-  return merged
+  return { days: data.days ?? [] }
 }
 
 export async function saveTrading(data: TradingData): Promise<boolean> {
-  return tileStore.saveData(USER_ID, SLOT, { ...data, proceduresSyncedDate: todayISO() })
+  return tileStore.saveData(USER_ID, SLOT, data)
 }
 
 export interface TradingStats {

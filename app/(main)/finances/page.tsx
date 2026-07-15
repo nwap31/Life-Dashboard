@@ -6,6 +6,7 @@ import {
   loadTrading,
   saveTrading,
   computeStats,
+  TRADING_RULES,
   type TradingData,
   type TradingDay,
   type Direction,
@@ -39,28 +40,14 @@ export default function FinancesPage() {
   const submit = () => {
     if (!data) return
     const others = data.days.filter((d) => d.date !== form.date)
-    const next = { ...data, days: [...others, form] }
+    const next = { days: [...others, form] }
     setData(next)
     saveTrading(next)
   }
 
   const removeDay = (date: string) => {
     if (!data) return
-    const next = { ...data, days: data.days.filter((d) => d.date !== date) }
-    setData(next)
-    saveTrading(next)
-  }
-
-  const toggleStep = (procId: string, stepId: string) => {
-    if (!data) return
-    const next = {
-      ...data,
-      procedures: data.procedures.map((p) =>
-        p.id === procId
-          ? { ...p, steps: p.steps.map((st) => (st.id === stepId ? { ...st, done: !st.done } : st)) }
-          : p,
-      ),
-    }
+    const next = { days: data.days.filter((d) => d.date !== date) }
     setData(next)
     saveTrading(next)
   }
@@ -86,20 +73,18 @@ export default function FinancesPage() {
       {tab === 'Trading' && data && stats && (
         <>
           <section className={s.section}>
-            <div className={s.sectionTitle}>Procedures</div>
-            {data.procedures.map((p) => (
-              <div key={p.id} className={s.card} style={{ marginBottom: 'var(--space-3)' }}>
-                <strong style={{ fontSize: 'var(--text-sm)' }}>{p.title}</strong>
-                <div className={s.rowList} style={{ marginTop: 'var(--space-2)' }}>
-                  {p.steps.map((st) => (
-                    <label key={st.id} className={`${s.checkRow} ${st.done ? s.checkRowDone : ''}`}>
-                      <input type="checkbox" checked={st.done} onChange={() => toggleStep(p.id, st.id)} />
-                      {st.text}
-                    </label>
-                  ))}
-                </div>
+            <div className={s.card}>
+              <div className={s.sectionTitle} style={{ marginBottom: 'var(--space-2)' }}>
+                Trading Rules
               </div>
-            ))}
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+                {TRADING_RULES.map((item) => (
+                  <li key={item} style={{ fontSize: 'var(--text-sm)' }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
 
           <div className={s.statRow}>
