@@ -42,6 +42,12 @@ export default function TradingPage() {
     saveTrading(next)
   }
 
+  const removeDay = (date: string) => {
+    const next = { days: data.days.filter((d) => d.date !== date) }
+    setData(next)
+    saveTrading(next)
+  }
+
   return (
     <div className={s.page}>
       <header className={s.header}>
@@ -158,6 +164,7 @@ export default function TradingPage() {
                 <th>Proj RR</th>
                 <th>Real RR</th>
                 <th>Rules</th>
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -172,6 +179,16 @@ export default function TradingPage() {
                   <td>{d.projectedRR}</td>
                   <td>{d.realizedRR}</td>
                   <td className={d.rules === 'clean' ? s.tagClean : s.tagBroke}>{d.rules}</td>
+                  <td>
+                    <button
+                      className="btn-link"
+                      onClick={() => {
+                        if (confirm(`Delete the ${d.date} entry?`)) removeDay(d.date)
+                      }}
+                    >
+                      delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
