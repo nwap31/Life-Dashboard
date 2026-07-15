@@ -83,7 +83,6 @@ export default function SchoolPage() {
   return (
     <div className={s.page}>
       <header className={s.header}>
-        <div className={s.eyebrow}>School</div>
         <h1 className={s.title}>School</h1>
       </header>
 

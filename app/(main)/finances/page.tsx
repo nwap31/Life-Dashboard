@@ -64,7 +64,6 @@ export default function FinancesPage() {
   return (
     <div className={s.page}>
       <header className={s.header}>
-        <div className={s.eyebrow}>Finances</div>
         <h1 className={s.title}>Finances</h1>
       </header>
 

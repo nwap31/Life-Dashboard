@@ -32,7 +32,6 @@ export default function SelfGrowthPage() {
   return (
     <div className={s.page}>
       <header className={s.header}>
-        <div className={s.eyebrow}>Self Growth</div>
         <h1 className={s.title}>Self Growth</h1>
       </header>
 

@@ -386,7 +386,6 @@ export default function FitnessPage() {
   return (
     <div className={s.page}>
       <header className={s.header}>
-        <div className={s.eyebrow}>Fitness</div>
         <h1 className={s.title}>Fitness</h1>
       </header>
 
