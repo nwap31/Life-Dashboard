@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import s from '../section.module.css'
 import f from './fitness.module.css'
-import { loadFitness, saveFitness, emptyDayLog, PRESETS, type FitnessData, type Preset } from '@/lib/data/fitness'
+import { loadFitness, saveFitness, emptyDayLog, presetExercises, PRESETS, type FitnessData, type Preset } from '@/lib/data/fitness'
 import { profile } from '@/lib/tiles/profile'
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -13,6 +13,10 @@ function pad(n: number) {
 }
 function isoOf(year: number, month: number, day: number) {
   return `${year}-${pad(month + 1)}-${pad(day)}`
+}
+function todayISO() {
+  const n = new Date()
+  return isoOf(n.getFullYear(), n.getMonth(), n.getDate())
 }
 
 export default function FitnessPage() {
@@ -54,7 +58,21 @@ export default function FitnessPage() {
     persist({ log: { ...data.log, [selected]: { ...current, ...patch } } })
   }
 
-  const setPreset = (preset: Preset) => updateDay({ preset })
+  // Picking a preset loads its template exercises — but only when the day is
+  // still empty, so it never clobbers exercises you've already logged.
+  const setPreset = (preset: Preset) => {
+    const current = selected ? data.log[selected] ?? emptyDayLog() : emptyDayLog()
+    if (current.exercises.length === 0) {
+      updateDay({ preset, exercises: presetExercises(preset) })
+    } else {
+      updateDay({ preset })
+    }
+  }
+
+  const resetToTemplate = () => {
+    if (!dayLog?.preset) return
+    updateDay({ exercises: presetExercises(dayLog.preset) })
+  }
 
   const addExercise = () => {
     const name = newExercise.trim()
@@ -96,36 +114,41 @@ export default function FitnessPage() {
       </header>
 
       <section className={s.section}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-3)' }}>
-          <button className="btn btn-ghost" onClick={() => setCursor((c) => (c.month === 0 ? { year: c.year - 1, month: 11 } : { ...c, month: c.month - 1 }))}>
-            ←
-          </button>
-          <strong>{monthLabel}</strong>
-          <button className="btn btn-ghost" onClick={() => setCursor((c) => (c.month === 11 ? { year: c.year + 1, month: 0 } : { ...c, month: c.month + 1 }))}>
-            →
-          </button>
-        </div>
-        <div className={f.calendar}>
-          {WEEKDAYS.map((w, i) => (
-            <div key={i} className={f.weekday}>
-              {w}
-            </div>
-          ))}
-          {cells.map((day, i) => {
-            if (day === null) return <div key={i} className={`${f.day} ${f.dayEmpty}`} />
-            const iso = isoOf(cursor.year, cursor.month, day)
-            const entry = data.log[iso]
-            return (
-              <div
-                key={i}
-                className={`${f.day} ${selected === iso ? f.daySelected : ''}`}
-                onClick={() => setSelected(iso)}
-              >
-                <span>{day}</span>
-                {entry?.preset && <span className={f.dayPreset}>{entry.preset}</span>}
+        <div className={f.calendarCard}>
+          <div className={f.calendarHead}>
+            <button className={f.navBtn} aria-label="Previous month" onClick={() => setCursor((c) => (c.month === 0 ? { year: c.year - 1, month: 11 } : { ...c, month: c.month - 1 }))}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <strong className={f.monthLabel}>{monthLabel}</strong>
+            <button className={f.navBtn} aria-label="Next month" onClick={() => setCursor((c) => (c.month === 11 ? { year: c.year + 1, month: 0 } : { ...c, month: c.month + 1 }))}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+          <div className={f.calendar}>
+            {WEEKDAYS.map((w, i) => (
+              <div key={i} className={f.weekday}>
+                {w}
               </div>
-            )
-          })}
+            ))}
+            {cells.map((day, i) => {
+              if (day === null) return <div key={i} className={`${f.day} ${f.dayEmpty}`} />
+              const iso = isoOf(cursor.year, cursor.month, day)
+              const entry = data.log[iso]
+              const classes = [f.day]
+              if (iso === todayISO()) classes.push(f.dayToday)
+              if (selected === iso) classes.push(f.daySelected)
+              return (
+                <div key={i} className={classes.join(' ')} onClick={() => setSelected(iso)}>
+                  <span className={f.dayNum}>{day}</span>
+                  {entry?.preset && <span className={f.dayPreset}>{entry.preset}</span>}
+                </div>
+              )
+            })}
+          </div>
         </div>
       </section>
 
@@ -155,7 +178,14 @@ export default function FitnessPage() {
               />
             </div>
 
-            <div className={s.sectionTitle}>Exercises</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className={s.sectionTitle}>Exercises</div>
+              {dayLog.preset && dayLog.preset !== 'Rest' && (
+                <button className="btn-link" onClick={resetToTemplate}>
+                  reset to {dayLog.preset} template
+                </button>
+              )}
+            </div>
             {dayLog.exercises.length === 0 ? (
               <p className={s.empty}>No exercises logged.</p>
             ) : (
