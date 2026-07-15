@@ -387,7 +387,7 @@ export default function FitnessPage() {
     <div className={s.page}>
       <header className={s.header}>
         <div className={s.eyebrow}>Fitness</div>
-        <h1 className={s.title}>{tab === 'Split' ? 'Split & training' : 'Nutrition'}</h1>
+        <h1 className={s.title}>Fitness</h1>
       </header>
 
       <div className={s.tabRow}>

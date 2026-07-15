@@ -84,7 +84,7 @@ export default function SchoolPage() {
     <div className={s.page}>
       <header className={s.header}>
         <div className={s.eyebrow}>School</div>
-        <h1 className={s.title}>{tab === 'Reading' ? 'Reading list' : 'Assignments'}</h1>
+        <h1 className={s.title}>School</h1>
       </header>
 
       <div className={s.tabRow}>

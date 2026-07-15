@@ -33,7 +33,7 @@ export default function SelfGrowthPage() {
     <div className={s.page}>
       <header className={s.header}>
         <div className={s.eyebrow}>Self Growth</div>
-        <h1 className={s.title}>Habit log</h1>
+        <h1 className={s.title}>Self Growth</h1>
       </header>
 
       <div className={s.tabRow}>

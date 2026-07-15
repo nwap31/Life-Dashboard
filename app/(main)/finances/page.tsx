@@ -65,7 +65,7 @@ export default function FinancesPage() {
     <div className={s.page}>
       <header className={s.header}>
         <div className={s.eyebrow}>Finances</div>
-        <h1 className={s.title}>Rules, P&amp;L, RR</h1>
+        <h1 className={s.title}>Finances</h1>
       </header>
 
       <div className={s.tabRow}>
