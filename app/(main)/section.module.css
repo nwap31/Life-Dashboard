@@ -157,3 +157,30 @@
   color: var(--red);
   font-weight: 600;
 }
+
+.tabRow {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-8);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--muted-strong);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+.tab:hover {
+  color: var(--fg);
+}
+
+.tabActive {
+  color: var(--mint-hover);
+  border-bottom-color: var(--mint);
+  font-weight: 600;
+}

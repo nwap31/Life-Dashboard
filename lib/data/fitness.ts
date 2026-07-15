@@ -31,7 +31,6 @@ export interface Exercise {
 export interface DayLog {
   preset?: Preset
   exercises: Exercise[]
-  calories?: number
   /** Optional supplement checkboxes — available on ANY day, not just Cardio+Abs. */
   supplementCardio?: boolean
   supplementAbs?: boolean

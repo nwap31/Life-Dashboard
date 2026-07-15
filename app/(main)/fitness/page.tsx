@@ -4,9 +4,12 @@ import { useEffect, useMemo, useState } from 'react'
 import s from '../section.module.css'
 import f from './fitness.module.css'
 import { loadFitness, saveFitness, emptyDayLog, presetExercises, PRESETS, type FitnessData, type Preset } from '@/lib/data/fitness'
+import { loadNutrition, saveNutrition, type NutritionData } from '@/lib/data/nutrition'
 import { profile } from '@/lib/tiles/profile'
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+const TABS = ['Split', 'Nutrition'] as const
+type Tab = (typeof TABS)[number]
 
 function pad(n: number) {
   return String(n).padStart(2, '0')
@@ -19,7 +22,7 @@ function todayISO() {
   return isoOf(n.getFullYear(), n.getMonth(), n.getDate())
 }
 
-export default function FitnessPage() {
+function SplitTab() {
   const [data, setData] = useState<FitnessData | null>(null)
   const [cursor, setCursor] = useState(() => {
     const now = new Date()
@@ -32,8 +35,6 @@ export default function FitnessPage() {
     loadFitness().then(setData)
   }, [])
 
-  const kcalTarget = profile().kcalTarget ?? 2700
-
   const cells = useMemo(() => {
     const { year, month } = cursor
     const firstDow = new Date(year, month, 1).getDay()
@@ -43,7 +44,7 @@ export default function FitnessPage() {
     return list
   }, [cursor])
 
-  if (!data) return <div className={s.page} />
+  if (!data) return null
 
   const persist = (next: FitnessData) => {
     setData(next)
@@ -114,12 +115,7 @@ export default function FitnessPage() {
   })
 
   return (
-    <div className={s.page}>
-      <header className={s.header}>
-        <div className={s.eyebrow}>Fitness</div>
-        <h1 className={s.title}>Split &amp; calories</h1>
-      </header>
-
+    <>
       <section className={s.section}>
         <div className={f.calendarCard}>
           <div className={f.calendarHead}>
@@ -175,36 +171,25 @@ export default function FitnessPage() {
               ))}
             </div>
 
-            <div className={s.grid2} style={{ marginBottom: 'var(--space-5)' }}>
-              <div className="field" style={{ maxWidth: 200 }}>
-                <span className="label">Calories (target {kcalTarget})</span>
-                <input
-                  className="input"
-                  type="number"
-                  value={dayLog.calories ?? ''}
-                  onChange={(e) => updateDay({ calories: Number(e.target.value) })}
-                />
-              </div>
-              <div className="field">
-                <span className="label">Supplement (optional)</span>
-                <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
-                  <label className={f.exerciseRow} style={{ borderBottom: 'none', padding: 0 }}>
-                    <input
-                      type="checkbox"
-                      checked={dayLog.supplementCardio ?? false}
-                      onChange={(e) => updateDay({ supplementCardio: e.target.checked })}
-                    />
-                    Did cardio
-                  </label>
-                  <label className={f.exerciseRow} style={{ borderBottom: 'none', padding: 0 }}>
-                    <input
-                      type="checkbox"
-                      checked={dayLog.supplementAbs ?? false}
-                      onChange={(e) => updateDay({ supplementAbs: e.target.checked })}
-                    />
-                    Did abs
-                  </label>
-                </div>
+            <div className="field" style={{ marginBottom: 'var(--space-5)' }}>
+              <span className="label">Supplement (optional)</span>
+              <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
+                <label className={f.exerciseRow} style={{ borderBottom: 'none', padding: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={dayLog.supplementCardio ?? false}
+                    onChange={(e) => updateDay({ supplementCardio: e.target.checked })}
+                  />
+                  Did cardio
+                </label>
+                <label className={f.exerciseRow} style={{ borderBottom: 'none', padding: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={dayLog.supplementAbs ?? false}
+                    onChange={(e) => updateDay({ supplementAbs: e.target.checked })}
+                  />
+                  Did abs
+                </label>
               </div>
             </div>
 
@@ -275,6 +260,145 @@ export default function FitnessPage() {
           </div>
         </section>
       )}
+    </>
+  )
+}
+
+function NutritionTab() {
+  const [data, setData] = useState<NutritionData | null>(null)
+  const [date, setDate] = useState(todayISO())
+  const [calories, setCalories] = useState<number | ''>('')
+  const kcalTarget = profile().kcalTarget ?? 2700
+
+  useEffect(() => {
+    loadNutrition().then((d) => {
+      setData(d)
+      const existing = d.log[todayISO()]
+      if (existing?.calories != null) setCalories(existing.calories)
+    })
+  }, [])
+
+  if (!data) return null
+
+  const submit = () => {
+    if (calories === '') return
+    const next = { log: { ...data.log, [date]: { calories } } }
+    setData(next)
+    saveNutrition(next)
+  }
+
+  const removeDay = (d: string) => {
+    const { [d]: _, ...rest } = data.log
+    const next = { log: rest }
+    setData(next)
+    saveNutrition(next)
+  }
+
+  const entries = Object.entries(data.log).sort((a, b) => b[0].localeCompare(a[0]))
+  const avg = entries.length ? Math.round(entries.reduce((sum, [, v]) => sum + (v.calories ?? 0), 0) / entries.length) : 0
+
+  return (
+    <>
+      <div className={s.statRow} style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        <div className={s.stat}>
+          <div className={s.statLabel}>Target</div>
+          <div className={s.statValue}>{kcalTarget}</div>
+        </div>
+        <div className={s.stat}>
+          <div className={s.statLabel}>Average logged</div>
+          <div className={s.statValue}>{avg || '—'}</div>
+        </div>
+      </div>
+
+      <section className={s.section}>
+        <div className={s.sectionTitle}>Log a day</div>
+        <div className={s.card}>
+          <div className={s.grid2}>
+            <div className="field">
+              <span className="label">Date</span>
+              <input className="input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div className="field">
+              <span className="label">Calories</span>
+              <input
+                className="input"
+                type="number"
+                value={calories}
+                onChange={(e) => setCalories(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </div>
+          </div>
+          <button className="btn btn-primary" style={{ marginTop: 'var(--space-4)' }} onClick={submit}>
+            Save day
+          </button>
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <div className={s.sectionTitle}>History</div>
+        {entries.length === 0 ? (
+          <p className={s.empty}>No days logged yet.</p>
+        ) : (
+          <table className={s.table}>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Calories</th>
+                <th>vs target</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map(([d, v]) => {
+                const diff = (v.calories ?? 0) - kcalTarget
+                return (
+                  <tr key={d}>
+                    <td>{d}</td>
+                    <td>{v.calories}</td>
+                    <td style={{ color: diff >= 0 ? 'var(--mint-hover)' : 'var(--red)' }}>
+                      {diff >= 0 ? '+' : ''}
+                      {diff}
+                    </td>
+                    <td>
+                      <button
+                        className="btn-link"
+                        onClick={() => {
+                          if (confirm(`Delete the ${d} entry?`)) removeDay(d)
+                        }}
+                      >
+                        delete
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </section>
+    </>
+  )
+}
+
+export default function FitnessPage() {
+  const [tab, setTab] = useState<Tab>('Split')
+
+  return (
+    <div className={s.page}>
+      <header className={s.header}>
+        <div className={s.eyebrow}>Fitness</div>
+        <h1 className={s.title}>{tab === 'Split' ? 'Split & training' : 'Nutrition'}</h1>
+      </header>
+
+      <div className={s.tabRow}>
+        {TABS.map((t) => (
+          <button key={t} className={`${s.tab} ${tab === t ? s.tabActive : ''}`} onClick={() => setTab(t)}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'Split' ? <SplitTab /> : <NutritionTab />}
     </div>
   )
 }
