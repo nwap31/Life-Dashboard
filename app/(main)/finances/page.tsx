@@ -12,6 +12,12 @@ import {
   type Direction,
   type RulesStatus,
 } from '@/lib/data/trading'
+import Heatmap from '@/components/Heatmap'
+
+function rulesHeatColor(v: number | null): string {
+  if (v === null) return 'var(--border)'
+  return v === 1 ? 'var(--olive)' : 'var(--red)'
+}
 
 const todayISO = new Date().toISOString().slice(0, 10)
 
@@ -84,6 +90,21 @@ export default function FinancesPage() {
                   </li>
                 ))}
               </ul>
+            </div>
+          </section>
+
+          <section className={s.section}>
+            <div className={s.sectionTitle}>Rules Adherence</div>
+            <div className={s.card}>
+              <Heatmap
+                getValue={(iso) => {
+                  const d = data.days.find((day) => day.date === iso)
+                  if (!d) return null
+                  return d.rules === 'clean' ? 1 : 0
+                }}
+                colorFor={rulesHeatColor}
+                getTitle={(iso, v) => (v === null ? `${iso}: no entry` : `${iso}: ${v === 1 ? 'Clean' : 'Broke'}`)}
+              />
             </div>
           </section>
 

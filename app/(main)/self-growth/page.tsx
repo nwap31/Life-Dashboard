@@ -3,6 +3,16 @@
 import { useEffect, useState } from 'react'
 import s from '../section.module.css'
 import { loadSelfGrowth, computeHabitStats, type SelfGrowthData } from '@/lib/data/selfGrowth'
+import Heatmap from '@/components/Heatmap'
+
+function habitHeatColor(v: number | null): string {
+  if (v === null) return 'var(--border)'
+  if (v <= 0) return 'var(--card)'
+  if (v < 0.34) return 'rgba(156, 90, 44, 0.28)'
+  if (v < 0.67) return 'rgba(156, 90, 44, 0.55)'
+  if (v < 1) return 'rgba(156, 90, 44, 0.8)'
+  return 'var(--mint)'
+}
 
 // Only one sub-section for now (Habits) — room for a reading/journal log etc. later.
 const TABS = ['Habits'] as const
@@ -50,6 +60,23 @@ export default function SelfGrowthPage() {
               <div className={s.statValue}>{stats.daysLogged}</div>
             </div>
           </div>
+
+          <section className={s.section}>
+            <div className={s.sectionTitle}>Streak Map</div>
+            <div className={s.card}>
+              <Heatmap
+                getValue={(iso) => {
+                  const e = data?.habitLog[iso]
+                  return e ? e.pct / 100 : null
+                }}
+                colorFor={habitHeatColor}
+                getTitle={(iso) => {
+                  const e = data?.habitLog[iso]
+                  return e ? `${iso}: ${e.completed}/${e.total} (${e.pct}%)` : `${iso}: no data`
+                }}
+              />
+            </div>
+          </section>
 
           <section className={s.section}>
             <div className={s.sectionTitle}>History</div>

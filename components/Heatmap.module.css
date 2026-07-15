@@ -1,0 +1,69 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+}
+
+.monthRow {
+  display: flex;
+  gap: 3px;
+}
+
+.weekdaySpacer {
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.monthLabel {
+  width: 12px;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.bodyRow {
+  display: flex;
+  gap: 3px;
+}
+
+.weekdayCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.weekdayLabel {
+  height: 12px;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 12px;
+}
+
+.grid {
+  display: flex;
+  gap: 3px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cell,
+.cellEmpty {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.cellEmpty {
+  background: transparent;
+}
