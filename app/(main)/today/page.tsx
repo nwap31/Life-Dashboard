@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react'
 import s from '../section.module.css'
 import { loadToday, saveToday, type TodayData } from '@/lib/data/today'
+import { logHabits } from '@/lib/data/selfGrowth'
 
 const today = new Date()
 const DATE_LABEL = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+const TODAY_ISO = today.toISOString().slice(0, 10)
 
 export default function TodayPage() {
   const [data, setData] = useState<TodayData | null>(null)
@@ -34,18 +36,9 @@ export default function TodayPage() {
   }
 
   const toggleHabit = (id: string) => {
-    persist({ ...data, habits: data.habits.map((h) => (h.id === id ? { ...h, done: !h.done } : h)) })
-  }
-
-  const toggleStep = (procId: string, stepId: string) => {
-    persist({
-      ...data,
-      procedures: data.procedures.map((p) =>
-        p.id === procId
-          ? { ...p, steps: p.steps.map((st) => (st.id === stepId ? { ...st, done: !st.done } : st)) }
-          : p,
-      ),
-    })
+    const habits = data.habits.map((h) => (h.id === id ? { ...h, done: !h.done } : h))
+    persist({ ...data, habits })
+    logHabits(TODAY_ISO, habits.length, habits.filter((h) => h.done).length)
   }
 
   return (
@@ -117,23 +110,6 @@ export default function TodayPage() {
             ))}
           </div>
         </div>
-      </section>
-
-      <section className={s.section}>
-        <div className={s.sectionTitle}>Procedures</div>
-        {data.procedures.map((p) => (
-          <div key={p.id} className={s.card} style={{ marginBottom: 'var(--space-3)' }}>
-            <strong style={{ fontSize: 'var(--text-sm)' }}>{p.title}</strong>
-            <div className={s.rowList} style={{ marginTop: 'var(--space-2)' }}>
-              {p.steps.map((st) => (
-                <label key={st.id} className={`${s.checkRow} ${st.done ? s.checkRowDone : ''}`}>
-                  <input type="checkbox" checked={st.done} onChange={() => toggleStep(p.id, st.id)} />
-                  {st.text}
-                </label>
-              ))}
-            </div>
-          </div>
-        ))}
       </section>
     </div>
   )

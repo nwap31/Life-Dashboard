@@ -51,6 +51,20 @@ export default function FinancesPage() {
     saveTrading(next)
   }
 
+  const toggleStep = (procId: string, stepId: string) => {
+    if (!data) return
+    const next = {
+      ...data,
+      procedures: data.procedures.map((p) =>
+        p.id === procId
+          ? { ...p, steps: p.steps.map((st) => (st.id === stepId ? { ...st, done: !st.done } : st)) }
+          : p,
+      ),
+    }
+    setData(next)
+    saveTrading(next)
+  }
+
   const stats = data ? computeStats(data.days) : null
   const sortedDays = data ? [...data.days].sort((a, b) => b.date.localeCompare(a.date)) : []
 
@@ -71,6 +85,23 @@ export default function FinancesPage() {
 
       {tab === 'Trading' && data && stats && (
         <>
+          <section className={s.section}>
+            <div className={s.sectionTitle}>Procedures</div>
+            {data.procedures.map((p) => (
+              <div key={p.id} className={s.card} style={{ marginBottom: 'var(--space-3)' }}>
+                <strong style={{ fontSize: 'var(--text-sm)' }}>{p.title}</strong>
+                <div className={s.rowList} style={{ marginTop: 'var(--space-2)' }}>
+                  {p.steps.map((st) => (
+                    <label key={st.id} className={`${s.checkRow} ${st.done ? s.checkRowDone : ''}`}>
+                      <input type="checkbox" checked={st.done} onChange={() => toggleStep(p.id, st.id)} />
+                      {st.text}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+
           <div className={s.statRow}>
             <div className={s.stat}>
               <div className={s.statLabel}>Net P&amp;L</div>

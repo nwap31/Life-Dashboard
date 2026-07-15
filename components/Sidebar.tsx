@@ -9,6 +9,7 @@ const NAV = [
   { href: '/finances', label: 'Finances', dot: 'var(--olive)' },
   { href: '/fitness', label: 'Fitness', dot: 'var(--red)' },
   { href: '/school', label: 'School', dot: 'var(--olive-deep)' },
+  { href: '/self-growth', label: 'Self Growth', dot: 'var(--wine)' },
 ]
 
 export default function Sidebar({ name }: { name?: string | null }) {
