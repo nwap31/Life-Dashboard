@@ -39,14 +39,14 @@ export default function FinancesPage() {
   const submit = () => {
     if (!data) return
     const others = data.days.filter((d) => d.date !== form.date)
-    const next = { days: [...others, form] }
+    const next = { ...data, days: [...others, form] }
     setData(next)
     saveTrading(next)
   }
 
   const removeDay = (date: string) => {
     if (!data) return
-    const next = { days: data.days.filter((d) => d.date !== date) }
+    const next = { ...data, days: data.days.filter((d) => d.date !== date) }
     setData(next)
     saveTrading(next)
   }
